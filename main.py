@@ -205,7 +205,7 @@ if searchResults.status_code == 200:
 
         if input("Would you like to create a file in GitHub? (y/n): ") == "y":
             friendlyName = input("Input a friendly name for the json file on GitHub (without the extention): ").replace(' ', '') + ".json"
-            createGitIo = input("Would you like to create git.io link? (y/n) :")
+            createGitIo = input("Would you like to create git.io link? (y/n): ")
             cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName, createGitIo)
             if createGitIo == "y":
                 print("\nCubari page: {}".format(cubariPage))
