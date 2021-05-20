@@ -7,7 +7,7 @@ with open("settings.json", 'r') as f:
 
 g = Github(data["githubToken"])
 
-def makeFileAndGetGist(filedata, friendlyName):
+def makeFileAndGetGist(filedata, friendlyName, createGitIo):
     url = "https://git.io/create"
 
     # Configure settings.json for the github directory you want to save to. For example: "user41/foobar"
@@ -16,7 +16,7 @@ def makeFileAndGetGist(filedata, friendlyName):
 
     raw_url = "https://raw.githubusercontent.com/{}/main/{}".format(data["repoDirectory"], friendlyName)
 
-    if input("Would you like to create a git.io link? (y/n): ") == "y":
+    if createGitIo == "y":
         customName = input("Input a custom name for the cubari link (leave empty to create a random one): ")
         if customName == "":
             r = requests.post(url, data={"url": raw_url})
