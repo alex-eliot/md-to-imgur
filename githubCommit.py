@@ -14,9 +14,13 @@ def makeFileAndGetGist(filedata, friendlyName):
     repo = g.get_repo(data["repoDirectory"])
     repo.create_file(friendlyName, "", filedata, branch="main")
 
-    raw_url = "https://raw.githubusercontent.com/ateteen-plus/foobar1/main/{}".format(friendlyName)
+    raw_url = "https://raw.githubusercontent.com/{}/main/{}".format(data["repoDirectory"], friendlyName)
 
-    r = requests.post(url, data={"url": raw_url})
+    customName = input("Input a custom name for the cubari link (leave empty to create a random one): ")
+    if customName == "":
+        r = requests.post(url, data={"url": raw_url})
+    else:
+        r = requests.post(url, data={"url": raw_url, "code": customName})
     if r.status_code == 200:
         return "https://cubari.moe/read/gist/{}/".format(r.text)
     else:
