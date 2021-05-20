@@ -5,6 +5,7 @@ import os
 from sendToImgur import *
 from getObjectInfo import *
 from githubCommit import *
+from stringManipulation import *
 
 def zeropad(zeros, name):
     return "0" * (zeros - len(name)) + name
