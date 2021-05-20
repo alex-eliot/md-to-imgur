@@ -21,7 +21,7 @@ You will also need to have an imgur subscription in rapidAPI. For more informati
 Below are listed what you need to set up in settings.json to get several functions working
 
  - Search and save chapters locally
-   + -
+   + Nothing
  - Search and save chapters on an imgur album (with an active token) (also creates a cubari.json with the appropriate format)
    + imgurToken
    + x-rapidapi-key
