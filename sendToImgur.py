@@ -2,6 +2,9 @@ import requests
 from datetime import datetime
 from auth import *
 
+def zeropad(zeros, name):
+    return "0" * (zeros - len(name)) + name
+
 def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID):
     mdlink = "https://api.mangadex.org"
     link = atHomeServer.json()["baseUrl"] + quality + hash + '/' + page

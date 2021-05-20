@@ -6,9 +6,6 @@ from sendToImgur import *
 from getObjectInfo import *
 from githubCommit import *
 
-def zeropad(zeros, name):
-    return "0" * (zeros - len(name)) + name
-
 mdlink = "https://api.mangadex.org"
 imgurlink = "https://api.imgur.com"
 imgUploadLink = "https://imgur-apiv3.p.rapidapi.com/3/image"
@@ -157,7 +154,7 @@ if searchResults.status_code == 200:
             os.chdir(mangaMU + "-" + mangaName["en"])
 
         for selectedChapter in chapterSelection.split(","):
-
+            chapterNumber = chapterList["results"][int(selectedChapter) - 1]["data"]["attributes"]["chapter"]
             if saveOption == "local":
                 try:
                     os.makedirs(zeropad(2, chapterNumber))
@@ -199,7 +196,7 @@ if searchResults.status_code == 200:
         if customCover != "y":
             firstChapter = cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"][list(cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"].keys())[0]]
             firstChapterID = firstChapter.split("/")[-2]
-            
+
             imgurHeaders = {"Authorization": "Bearer {}".format(data["imgurToken"])}
             r1 = requests.get("https://api.imgur.com/3/album/{}/images".format(firstChapterID), headers=imgurHeaders)
             cover = "https://i.imgur.com/{}.png".format(r1.json()["data"][0]["id"])
