@@ -66,7 +66,7 @@ if searchResults.status_code == 200:
                     coverPath = input("\nInput path for the image: ")
                     try:
                         with open(coverPath, 'rb') as f:
-                            coverSend = requests.post(imgUploadLink, data=f.read(), headers=headers)
+                            coverSend = requests.post(imgurlink + "/3/image", data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
                             if coverSend.status_code == 200:
                                 success = True
                                 print("(#) Cover successfully uploaded.")
@@ -76,7 +76,7 @@ if searchResults.status_code == 200:
                         print("(!) Unable to access/locate file.")
                 elif fileOrLink == "2":
                     coverPath = input("\nInput link for the image: ")
-                    coverSend = requests.post(imgUploadLink, data=coverPath, headers=headers)
+                    coverSend = requests.post(imgurlink + "/3/image", data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
                     if coverSend.status_code == 200:
                         success = True
                         print("(#) Cover successfully uploaded.")
