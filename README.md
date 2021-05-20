@@ -64,7 +64,7 @@ Simply `python3 main.py` to run. Manga search query is currently only available 
  - searchResultsLimit: Search results limit (Mangadex values: min=1, max=100, default=10)
  - chapterResultsLimit: Chapter results limit (Mangadex values: min=1, max=500, default=100)
  - fallbackServers: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attmept to retrieve it from the server(s) given
- - maxReconnectAttempts: If none of the fallback servers succeed in giving the requested image, the program will reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
+ - maxReconnectAttempts: If none of the fallback servers succeed in giving the requested image, the program will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
 
 ## Selecting chapters
 
