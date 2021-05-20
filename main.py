@@ -199,7 +199,9 @@ if searchResults.status_code == 200:
         if customCover != "y":
             firstChapter = cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"][list(cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"].keys())[0]]
             firstChapterID = firstChapter.split("/")[-2]
-            r1 = requests.get("https://imgur-apiv3.p.rapidapi.com/3/album/" + firstChapterID + "/images", headers=headers)
+            
+            imgurHeaders = {"Authorization": "Bearer {}".format(data["imgurToken"])}
+            r1 = requests.get("https://api.imgur.com/3/album/{}/images".format(firstChapterID), headers=imgurHeaders)
             cover = "https://i.imgur.com/{}.png".format(r1.json()["data"][0]["id"])
             cubariJson["cover"] = cover
 
