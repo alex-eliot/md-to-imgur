@@ -18,6 +18,24 @@ You will also need to have an imgur subscription in rapidAPI. For more informati
 
 # Configuration
 
+In order to use program, you need to make a settings.json file with the (temporary) contents:
+
+```json
+{
+  "clientID": "YOUR_IMGUR_CLIENT_ID",
+  "clientSecret": "YOUR_IMGUR_CLIENT_SECRET",
+  "refreshToken": "YOUR_IMGUR_REFRESH_TOKEN",
+  "x-rapidapi-key": "YOUR_X-RAPIDAPI-KEY",
+  "githubToken": "YOUR_GITHUB_TOKEN",
+  "maxReconnectAttempts": 10,
+  "repoDirectory": "YOUR_GITHUB_REPO_DIRECTORY",
+  "languageFilter": "en",
+  "searchResultsLimit": 30,
+  "chapterResultsLimit": 500,
+  "fallbackServers": [],
+  "imgurToken": "YOUR_IMGUR_TOKEN"
+}```
+
 Below are listed what you need to set up in settings.json to get several functions working
 
  - Search and save chapters locally
@@ -35,6 +53,10 @@ Below are listed what you need to set up in settings.json to get several functio
    + clientSecret
    + refreshToken
 
+# Running/Using
 
+Simply `python3 main.py` to run. Manga search query is currently only available by name. Change the
+
+# Disclaimer
 
 The project is simply created for educational use.
