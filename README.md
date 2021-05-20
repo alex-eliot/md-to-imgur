@@ -34,7 +34,8 @@ In order to use program, you need to make a settings.json file with the (tempora
   "chapterResultsLimit": 500,
   "fallbackServers": [],
   "imgurToken": "YOUR_IMGUR_TOKEN"
-}```
+}
+```
 
 Below are listed what you need to set up in settings.json to get several functions working
 
