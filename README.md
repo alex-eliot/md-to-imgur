@@ -70,16 +70,18 @@ Simply `python3 main.py` to run. Manga search query is currently only available 
 
 For example, if the chapter list is printed as such:
 
-`[1]: (en) Chapter 1 - No Group Scanlation\n
-[2]: (en) Chapter 2 - No Group Scanlation\n
-[3]: (en) Chapter 3 - No Group Scanlation\n
-[4]: (en) Chapter 4 - No Group Scanlation\n
-[5]: (en) Chapter 5 - No Group Scanlation\n
-[6]: (en) Chapter 6 - No Group Scanlation\n
-[7]: (en) Chapter 7 - No Group Scanlation\n
-[8]: (en) Chapter 8 - No Group Scanlation\n
-[9]: (en) Chapter 9 - No Group Scanlation\n
-[10]: (en) Chapter 10 - No Group Scanlation`
+```
+[1]: (en) Chapter 1 - No Group Scanlation
+[2]: (en) Chapter 2 - No Group Scanlation
+[3]: (en) Chapter 3 - No Group Scanlation
+[4]: (en) Chapter 4 - No Group Scanlation
+[5]: (en) Chapter 5 - No Group Scanlation
+[6]: (en) Chapter 6 - No Group Scanlation
+[7]: (en) Chapter 7 - No Group Scanlation
+[8]: (en) Chapter 8 - No Group Scanlation
+[9]: (en) Chapter 9 - No Group Scanlation
+[10]: (en) Chapter 10 - No Group Scanlation
+```
 
 Input `4` to select chapter 4.
 Input `1,2,5,10` to select chapters 1, 2, 5 and 10.
