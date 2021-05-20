@@ -42,17 +42,17 @@ Below are listed what you need to set up in settings.json to get several functio
  - Search and save chapters locally
    + Nothing
  - Search and save chapters on an imgur album (with an active token) (also creates a cubari.json with the appropriate format)
-   + imgurToken
-   + x-rapidapi-key
+   + `imgurToken`
+   + `x-rapidapi-key`
  - Upload cubari.json to a Github repository with a custom name (and create git.io gist with custom link)
-   + githubToken
-   + repoDirectory (Must be in the format `"username/repo"`)
+   + `githubToken`
+   + `repoDirectory` (Must be in the format `"username/repo"`)
  - Upload a custom cover for the cubari page
-   + clientID
+   + `clientID`
  - Automatically update imgurToken (access_token) running auth.py separately
-   + clientID
-   + clientSecret
-   + refreshToken
+   + `clientID`
+   + `clientSecret`
+   + `refreshToken`
 
 # Running/Using
 
@@ -60,11 +60,11 @@ Simply `python3 main.py` to run. Manga search query is currently only available 
 
 ## Settings
 
- - languageFilter: Filter chapter by language, default=en (English)
- - searchResultsLimit: Search results limit (Mangadex values: min=1, max=100, default=10)
- - chapterResultsLimit: Chapter results limit (Mangadex values: min=1, max=500, default=100)
- - fallbackServers: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attmept to retrieve it from the server(s) given
- - maxReconnectAttempts: If none of the fallback servers succeed in giving the requested image, the program will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
+ - `languageFilter`: Filter chapter by language, default=en (English)
+ - `searchResultsLimit`: Search results limit (Mangadex values: min=1, max=100, default=10)
+ - `chapterResultsLimit`: Chapter results limit (Mangadex values: min=1, max=500, default=100)
+ - `fallbackServers`: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attmept to retrieve it from the server(s) given
+ - `maxReconnectAttempts`: If none of the fallback servers succeed in giving the requested image, the program will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
 
 ## Selecting chapters
 
