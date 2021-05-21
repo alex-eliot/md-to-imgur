@@ -17,7 +17,7 @@ def getChapterGroups(chapter):
 def getNameByID(ids, type):
     mdlink = "https://api.mangadex.org"
     names = []
-    for ID in ids:
-        r = requests.get(mdlink + "/" + type, params={"ids[]": ID})
+    for id in ids:
+        r = requests.get(mdlink + "/" + type, params={"ids[]": id})
         names.append(r.json()["results"][0]["data"]["attributes"]["name"])
     return names

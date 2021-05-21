@@ -68,7 +68,7 @@ if searchResults.status_code == 200:
                     coverPath = input("\nInput path for the image: ")
                     try:
                         with open(coverPath, 'rb') as f:
-                            coverSend = requests.post(imgUploadLink, data=f.read(), headers=headers)
+                            coverSend = requests.post(imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(clientID)})
                             if coverSend.status_code == 200:
                                 success = True
                                 print("(#) Cover successfully uploaded.")
@@ -78,7 +78,7 @@ if searchResults.status_code == 200:
                         print("(!) Unable to access/locate file.")
                 elif fileOrLink == "2":
                     coverPath = input("\nInput link for the image: ")
-                    coverSend = requests.post(imgUploadLink, data=coverPath, headers=headers)
+                    coverSend = requests.post(imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
                     if coverSend.status_code == 200:
                         success = True
                         print("(#) Cover successfully uploaded.")
@@ -167,30 +167,30 @@ if searchResults.status_code == 200:
                 except FileExistsError:
                     pass
                 os.chdir(zeropad(2, chapterNumber))
+                os.chdir("../")
 
             groups = getChapterGroups(chapterList["results"][int(selectedChapter) - 1])
             pageIDs, contents = sendChapter(chapterList["results"][int(selectedChapter) - 1], qualitySelect, saveOption, data, headers)
 
-            attempts = 1
-            while pageIDs is None and contents is None and attempts <= 10:
-                attempts += 1
-                print("(#) Resetting connection...")
-                pageIDs, contents = sendChapter(chapterList["results"][int(selectedChapter) - 1], qualitySelect, saveOption, data, headers)
+            failed = False
+            if pageIDs is None and contents is None:
+                failed = True
+                if input("(#) Failed to receive all pages for chapter {}. Would you like to create a cubari.json with the previously fetched chapters? (y/n): ") != "y":
+                    exit()
 
-            if saveOption == "imgur":
-                albumTitle = mangaName["en"] + " - Chapter " + list(contents.keys())[0]
+            if not failed:
+                if saveOption == "imgur":
+                    albumTitle = mangaName["en"] + " - Chapter " + list(contents.keys())[0]
+                    payload = {"title": albumTitle, "cover": pageIDs[0], "privacy": "hidden", "ids[]": pageIDs}
+                    albumCreate = requests.post(albumCreateLink, data=payload, headers=headers)
+                    if albumCreate.status_code == 200:
+                        albumID = albumCreate.json()["data"]["id"]
+                        contents[list(contents.keys())[0]]["groups"][groups] = "/proxy/api/imgur/chapter/{}/".format(albumID)
+                        print("(#) Chapter {} album successfully created, id = {}".format(list(contents.keys())[0], albumID))
+                    cubariJson["chapters"][list(contents.keys())[0]] = contents[list(contents.keys())[0]]
 
-                payload = {"title": albumTitle, "cover": pageIDs[0], "privacy": "hidden", "ids[]": pageIDs}
-                albumCreate = requests.post(albumCreateLink, data=payload, headers=headers)
-                if albumCreate.status_code == 200:
-                    albumID = albumCreate.json()["data"]["id"]
-                    contents[list(contents.keys())[0]]["groups"][groups] = "/proxy/api/imgur/chapter/{}/".format(albumID)
-                    print("(#) Chapter {} album successfully created, id = {}".format(list(contents.keys())[0], albumID))
-
-            if saveOption == "local":
-                os.chdir("../")
-            elif saveOption == "imgur":
-                cubariJson["chapters"][list(contents.keys())[0]] = contents[list(contents.keys())[0]]
+                if saveOption == "local":
+                    os.chdir("../")
 
         if saveOption == "local":
             os.chdir("../")
@@ -206,9 +206,11 @@ if searchResults.status_code == 200:
             cover = "https://i.imgur.com/{}.png".format(r1.json()["data"][0]["id"])
             cubariJson["cover"] = cover
 
+        cubariPage = None
         if input("Would you like to create a file in GitHub? (y/n): ") == "y":
             friendlyName = input("Input a friendly name for the json file on GitHub (without the extention): ").replace(' ', '') + ".json"
             cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName)
 
 print("(#) Operation finished with no errors.")
-print("\nCubari page: {}".format(cubariPage))
+if cubariPage is not None:
+    print("\nCubari page: {}".format(cubariPage))

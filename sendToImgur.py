@@ -77,9 +77,6 @@ def sendChapter(chapter, dataSaver, saveOption, data, headers):
         pages = chapterPagesDataSaver
         quality = "/data-saver/"
 
-    print("(#) Running server health test...")
-    atHomeServer = imageRetrieveTest(atHomeServer, chapterHash, pages[0], quality, chapterID)
-
     print(""
     + "(#) Proceeding to download the rest pages..."           * (saveOption == "local")
     + "(#) Proceeding to send the rest pages to imgur..."      * (saveOption == "imgur")
@@ -87,7 +84,44 @@ def sendChapter(chapter, dataSaver, saveOption, data, headers):
     pageIDs = []
 
     for index, page in enumerate(pages):
+        retrieved = False
+
+        # PRIORITY SERVERS
+        i = 0
+        while not retrieved and i < len(data["priorityServers"]):
+            server = data["priorityServers"][i]
+            if server[-1] == "/":
+                server = server[0:len(server) - 1]
+            link = server + quality + chapterHash + "/" + page
+
+            if saveOption == "local":
+                img = requests.get(link)
+                extention = "." + page.split(".")[-1]
+                filename = zeropad(3, str(index + 1)) + extention
+                if img.status_code == 200:
+                    with open(filename, 'wb') as outfile:
+                        outfile.write(img.content)
+                    retrieved = True
+                else:
+                    print("(!) Unable to retrieve page {}, error code: {}".format(index + 1, img.status_code))
+                    if i < len(data["priorityServers"]):
+                        print("(#) Trying next priority server...")
+                    i += 1
+
+            elif saveOption == "imgur":
+                response = requests.post(imgUploadLink, data=link, headers=headers)
+                if response.status_code == 200:
+                    pageIDs.append(response.json()["data"]["id"])
+                    retrieved = True
+                else:
+                    print("(!) Failed to send page {} to imgur for chapter {}.".format(index + 1, chapterNumber))
+
+
+        # STANDARD SERVERS
         link = atHomeServer.json()["baseUrl"] + quality + chapterHash + '/' + page
+
+        print("(#) Running server health test...")
+        atHomeServer = imageRetrieveTest(atHomeServer, chapterHash, pages[0], quality, chapterID)
 
         if saveOption == "local":
             img = requests.get(link)
@@ -96,58 +130,101 @@ def sendChapter(chapter, dataSaver, saveOption, data, headers):
             if img.status_code == 200:
                 with open(filename, 'wb') as outfile:
                     outfile.write(img.content)
+                retrieved = True
             else:
-                print("(!) Unable to retrieve image, error code: " + str(img.status_code))
-
-                if len(data["fallbackServers"]) == 0:
-                    return None, None
-                for server in data["fallbackServers"]:
-                    print("(#) Retrying from {}".format(server))
-                    if server[-1] == "/":
-                        server = server[0:len(server) - 1]
-                    link = server + quality + chapterHash + '/' + page
-                    img = requests.get(link)
-                    extention = "." + page.split(".")[-1]
-                    filename = zeropad(3, str(index + 1)) + extention
-                    if img.status_code == 200:
-                        print("(#) Image successfully retrieved from reattempt.")
-                        with open(filename, 'wb') as outfile:
-                            outfile.write(img.content)
-                    else:
-                        return None, None
+                print("(!) Unable to retrieve page {} from chapter {}, error code: {}".format(index + 1, img.status_code, img.status_code))
 
         elif saveOption == "imgur":
             response = requests.post(imgUploadLink, data=link, headers=headers)
             if response.status_code == 200:
                 pageIDs.append(response.json()["data"]["id"])
+                retrieved = True
             else:
-                print("(!) Failed to send page {} to imgur for chapter {}.".format(index + 1, chapterNumber))
+                print("(!) Failed to send page {} to imgur for chapter {}, error code: {}.".format(index + 1, chapterNumber, response.status_code))
 
-                if len(data["fallbackServers"]) == 0:
-                    return None, None
-                for server in data["fallbackServers"]:
-                    if server[-1] == "/":
-                        server = server[0:len(server) - 1]
-                    print("(#) Retrying from {}...".format(server))
-                    link = server + quality + chapterHash + '/' + page
-                    response = requests.post(imgUploadLink, data=link, headers=headers)
-                    if response.status_code == 200:
-                        print("(#) Image successfully sent from reattempt.")
-                        pageIDs.append(response.json()["data"]["id"])
+
+        # FALLBACK SERVERS
+        i = 0
+        while not retrieved and i < len(data["fallbackServers"]):
+            link = data["fallbackServers"][i] + quality + chapterHash + "/" + page
+
+            if saveOption == "local":
+                img = requests.get(link)
+                extention = "." + page.split(".")[-1]
+                filename = zeropad(3, str(index + 1)) + extention
+                if img.status_code == 200:
+                    with open(filename, 'wb') as outfile:
+                        outfile.write(img.content)
+                    retrieved = True
+                else:
+                    print("(!) Unable to retrieve page {}, error code: {}".format(index + 1, img.status_code))
+                    if i < len(data["priorityServers"]):
+                        print("(#) Trying next priority server...")
+                    i += 1
+
+            elif saveOption == "imgur":
+                response = requests.post(imgUploadLink, data=link, headers=headers)
+                if response.status_code == 200:
+                    pageIDs.append(response.json()["data"]["id"])
+                    retrieved = True
+                else:
+                    print("(!) Failed to send page {} to imgur for chapter {}.".format(index + 1, chapterNumber))
+
+        # ALL SERVERS FAIL
+        reconnectAttempts = 0
+        while not retrieved and reconnectAttempts < data["maxReconnectAttempts"]:
+            reconnectAttempts += 1
+            print("(!) Unable to retrieve page {} of chapter {} from all attempts, attempting reconnection...".format(index + 1, chapterNumber))
+            atHomeServer = imageRetrieveTest(atHomeServer, chapterHash, page, quality, chapterID)
+
+            link = atHomeServer.json()["baseUrl"] + quality + chapterHash + '/' + page
+
+            if saveOption == "local":
+                img = requests.get(link)
+                extention = "." + page.split(".")[-1]
+                filename = zeropad(3, str(index + 1)) + extention
+                if img.status_code == 200:
+                    with open(filename, 'wb') as outfile:
+                        outfile.write(img.content)
+                    retrieved = True
+                else:
+                    print("(!) Unable to retrieve page {} from chapter {}, error code: {}".format(index + 1, img.status_code, img.status_code))
+
+            elif saveOption == "imgur":
+                response = requests.post(imgUploadLink, data=link, headers=headers)
+                if response.status_code == 200:
+                    pageIDs.append(response.json()["data"]["id"])
+                    retrieved = True
+                else:
+                    print("(!) Failed to send page {} to imgur for chapter {}, error code: {}.".format(index + 1, chapterNumber, response.status_code))
+
+        if not retrieved:
+            print("(!) Failed to retrieve page {} of chapter {} from all attempts.".format(index + 1, chapterNumber))
+
+            if len(pageIDs) > 0:
+                print("(#) Attempting to delete pages {}-{} of chapter {} from account".format(1, index + 1, chapterNumber))
+                del_headers = {
+                    "authorization": headers["authorization"],
+                    "x-rapidapi-key": headers["x-rapidapi-key"],
+                    "x-rapidapi-host": headers["x-rapidapi-host"]
+                }
+                deleted = 0
+                for id in pageIDs:
+                    imgDel = requests.delete("https://imgur-apiv3.p.rapidapi.com/3/account/{}/image/{}".format(data["imgurUser"], id), headers=del_headers)
+                    failedPages = []
+                    if imgDel.status_code == 200:
+                        deleted += 1
                     else:
-                        if len(pageIDs) > 0:
-                            del_headers = {
-                                "authorization": headers["authorization"],
-                                "x-rapidapi-key": headers["x-rapidapi-key"],
-                                "x-rapidapi-host": headers["x-rapidapi-host"]
-                            }
-                            for id in pageIDs:
-                                requests.delete("https://imgur-apiv3.p.rapidapi.com/3/account/{}/image/{}".format(data["imgurUser"], id), headers=del_headers)
-                        return None, None
+                        failedPages.append(str(index + 1))
+                if deleted == len(pageIDs):
+                    print("(#) Successfully deleted pages {}-{} of chapter {} from account.".format(1, index + 1, chapterNumber))
+                else:
+                    print("(!) Failed to delete all of the pages {}-{} of chapter {} from account, error code: {}".format(1, index + 1, chapterNumber, imgDel.status_code))
+            return None, None
 
     print(""
-    + "(#) All pages for chapter {} have been successfully downloaded.".format(chapterNumber)       * (saveOption == "local")
-    + "(#) All pages for chapter {} have been successfully sent to imgur.".format(chapterNumber)    * (saveOption == "imgur")
+    + "(#) All {} pages for chapter {} have been successfully downloaded.".format(len(pages), chapterNumber)       * (saveOption == "local")
+    + "(#) All {} pages for chapter {} have been successfully sent to imgur.".format(len(pages), chapterNumber)    * (saveOption == "imgur")
     )
 
     if saveOption == "imgur":

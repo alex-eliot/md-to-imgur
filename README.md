@@ -32,6 +32,7 @@ In order to use the program, you need to make a settings.json file with the (tem
   "languageFilter": "en",
   "searchResultsLimit": 30,
   "chapterResultsLimit": 500,
+  "priorityServers": [],
   "fallbackServers": [],
   "maxReconnectAttempts": 10
 }
@@ -63,8 +64,9 @@ Simply `python3 main.py` to run. Manga search query is currently only available 
  - `languageFilter`: Filter chapter by language, default=en (English)
  - `searchResultsLimit`: Search results limit (Mangadex values: min=1, max=100, default=10)
  - `chapterResultsLimit`: Chapter results limit (Mangadex values: min=1, max=500, default=100)
- - `fallbackServers`: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attempt to retrieve it from the server(s) given
- - `maxReconnectAttempts`: If none of the fallback servers succeed in giving the requested image, the program will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
+ - `priorityServers`: The program will attempt to retrieve the images first from the servers listed. If it fails to do so, it will move on to the standard servers.
+ - `fallbackServers`: If retrieving from priority and/or standard servers fails, the program will attempt to retrieve the image from the fallback servers.
+ - `maxReconnectAttempts`: If the program fails to retrieve from priority/standard/fallback, it will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages (Note, the program will inevitably attempt to retrieve the pages from the priority servers before moving to the new md@home server. In the future, the program will be updated to ignore priority and fallback servers in the case of reconnection).
 
 ## Selecting chapters
 
@@ -85,7 +87,7 @@ For example, if the chapter list is printed as such:
 
  - Input `4` to select chapter 4.
  - Input `1,2,5,10` to select chapters 1, 2, 5, 10.
- - Input `1-5` to select chapters 1, 2, 3, 4, 6
+ - Input `1-5` to select chapters 1, 2, 3, 4, 5
  - Input `1-3, 6-10` to select chapters 1, 2, 3, 6, 7, 8, 9, 10
  - Input `all` to select all listed chapters.
 
@@ -113,6 +115,28 @@ After the image sending process is complete, a prompt appears asking whether you
 Lastly, if the image is selected to be uploaded to Github, user is asked if they want to create a git.io gist for that file. Selecting yes will prompt the user to input a name for the custom URL. You can simply press enter without inputting anything, to create a random link, and not a custom one.
 The program will finally print the finalized cubari page to the console.
 For example `Cubari link: https://cubari.moe/read/gist/BestManga/`
+
+## Request management
+
+Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and a global limit of 50 uploads per hour and 500 requests per hour). For that reason, the program incorporates higher RapidAPI upload and request limits. The free plan offers 10,000 uploads and 100,000 total requests per month. As of the moment, the program doesn't do any tracking/checking for the remaining requests and uploads. Beware of the page count before uploading chapters, because if you pass the request limit on RapidAPI, you will be charged for every next request. My recommendation is to use a prepaid card with no credit, to avoid any potential charges that may occur.
+
+### Total RapidAPI requests depending on scenario
+
+WIP
+
+For the sake of consistency, let's declare the following:
+ - Number of chapters selected: <img src="https://latex.codecogs.com/gif.latex?n\text{}"/>
+ - Number of pages in chapter <img src="https://latex.codecogs.com/gif.latex?n\text{}"/>: <img src="https://latex.codecogs.com/gif.latex?k_n\text{}"/>
+ - Number of priority servers: <img src="https://latex.codecogs.com/gif.latex?P\text{}"/>
+ - Number of failure to receive from priority servers: "https://latex.codecogs.com/gif.latex?fail_P \leq P\text{}"/>
+ - Number of fallback servers: <img src="https://latex.codecogs.com/gif.latex?F\text{}"/>
+ - Number of failure to receive from fallback servers: "https://latex.codecogs.com/gif.latex?fail_F \leq F\text{}"/>
+ - Number of reconnection attempts: "https://latex.codecogs.com/gif.latex?R\text{}"/>
+
+ - Search and download chapters from Mangadex
+   + None
+ - Send a chapter to imgur (without custom cover)
+   +
 
 # Disclaimer
 
