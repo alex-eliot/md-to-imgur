@@ -122,21 +122,21 @@ Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and 
 
 ### Total RapidAPI requests depending on scenario
 
-WIP
+Not completed here
 
 For the sake of consistency, let's declare the following:
  - Number of chapters selected: n
  - Number of pages in chapter n: k<sub>n</sub>
  - Number of priority servers: P
  - Number of failure to receive from priority servers: fail<sub>P</sub> &#8804; P
- - Number of fallback servers: <img src="https://latex.codecogs.com/gif.latex?F\text{}"/>
- - Number of failure to receive from fallback servers: <img src="https://latex.codecogs.com/gif.latex?fail_F \leq F\text{}"/>
- - Number of reconnection attempts: <img src="https://latex.codecogs.com/gif.latex?R\text{}"/>
+ - Number of fallback servers: F
+ - Number of failure to receive from fallback servers: fail<sub>F</sub> &#8804; F
+ - Number of reconnection attempts: R
 
  - Search and download chapters from Mangadex
    + None
  - Send a chapter to imgur (without custom cover)
-   +
+   + <img src="https://latex2image-output.s3.amazonaws.com/img-4dkaNMja.jpg" />
 
 # Disclaimer
 
