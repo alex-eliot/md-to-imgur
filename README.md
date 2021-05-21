@@ -18,7 +18,7 @@ You will also need to have an imgur subscription in rapidAPI. For more informati
 
 # Configuration
 
-In order to use program, you need to make a settings.json file with the (temporary) contents:
+In order to use the program, you need to make a settings.json file with the (temporary) contents:
 
 ```json
 {
@@ -49,7 +49,7 @@ Below are listed what you need to set up in settings.json to get several functio
    + `repoDirectory` (Must be in the format `"username/repo"`)
  - Upload a custom cover for the cubari page
    + `clientID`
- - Automatically update imgurToken (access_token) running auth.py separately
+ - Automatically update imgurToken (access_token) running refreshImgurToken.py separately
    + `clientID`
    + `clientSecret`
    + `refreshToken`
@@ -83,12 +83,14 @@ For example, if the chapter list is printed as such:
 [10]: (en) Chapter 10 - No Group Scanlation
 ```
 
-Input `4` to select chapter 4.
-Input `1,2,5,10` to select chapters 1, 2, 5 and 10.
-Input `1-5` to select all chapters from 1 to 5.
-Input `all` to select all listed chapters.
+ - Input `4` to select chapter 4.
+ - Input `1,2,5,10` to select chapters 1, 2, 5 and 10.
+ - Input `1-5` to select all chapters from 1 to 5.
+ - Input `all` to select all listed chapters.
 
 Note that when inputting selection, the numbers are following the chapters' indexes and not their numberings on Mangadex.
+
+
 
 ## Uploading custom covers
 
@@ -99,7 +101,7 @@ If chosen to save to an imgur album, a prompt will appear asking if you wish to 
  - Uploading from url
    + Select `[2]: Image link` and thus input the url pointing to the image. To make sure the given url doesn't get changed or moved by the respective web admin of the image's domain, the image will be uploaded anonymously to imgur (this will use the imgur's API and not rapidAPI's)
 
-If you choose not to upload custom cover, the program will assign the first page of the first chapter uploaded, as a cover.
+If you choose not to upload a custom cover, the program will assign the first page of the first chapter uploaded, as a cover.
 
 ## Saving to Github
 

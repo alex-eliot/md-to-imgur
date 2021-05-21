@@ -12,6 +12,7 @@ def zeropad(zeros, name):
 
 mdlink = "https://api.mangadex.org"
 imgurlink = "https://api.imgur.com"
+imgurUploadLink = "https://api.imgur.com/3/image"
 imgUploadLink = "https://imgur-apiv3.p.rapidapi.com/3/image"
 albumCreateLink = "https://imgur-apiv3.p.rapidapi.com/3/album"
 

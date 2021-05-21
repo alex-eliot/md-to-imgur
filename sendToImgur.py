@@ -1,6 +1,6 @@
 import requests
+import dateutil.parser as dp
 from datetime import datetime
-from auth import *
 
 def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID):
     mdlink = "https://api.mangadex.org"
@@ -56,12 +56,9 @@ def sendChapter(chapter, dataSaver, saveOption, data, headers):
         contents[chapterNumber]["volume"] = chapterVolume
     contents[chapterNumber]["groups"] = {}
 
-    curTime = requests.get("https://showcase.api.linx.twenty57.net/UnixTime/tounix?date=now")
-    if curTime.status_code == 200:
-        contents[chapterNumber]["last_updated"] = curTime.text[1:len(curTime.text)-1]
-    else:
-        print("(!) Failed to revieve current unix timestamp from server.")
-        contents[chapterNumber]["last_updated"] = "1549892280"
+    chapterTimeUpdated = dp.parse(chapter["data"]["attributes"]["updatedAt"])
+    chapterTimeUpdatedUnix = int(chapterTimeUpdated.timestamp())
+    contents[chapterNumber]["last_updated"] = chapterTimeUpdatedUnix
 
     print(""
     + "(#) Proceeding to download chapter {}.".format(chapterNumber)        * (saveOption == "local")
