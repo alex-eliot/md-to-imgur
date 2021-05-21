@@ -130,8 +130,8 @@ For the sake of consistency, let's declare the following:
  - Number of priority servers: <img src="https://latex.codecogs.com/gif.latex?P\text{}"/>
  - Number of failure to receive from priority servers: "https://latex.codecogs.com/gif.latex?fail_P \leq P\text{}"/>
  - Number of fallback servers: <img src="https://latex.codecogs.com/gif.latex?F\text{}"/>
- - Number of failure to receive from fallback servers: "https://latex.codecogs.com/gif.latex?fail_F \leq F\text{}"/>
- - Number of reconnection attempts: "https://latex.codecogs.com/gif.latex?R\text{}"/>
+ - Number of failure to receive from fallback servers: <img src="https://latex.codecogs.com/gif.latex?fail_F \leq F\text{}"/>
+ - Number of reconnection attempts: <img src="https://latex.codecogs.com/gif.latex?R\text{}"/>
 
  - Search and download chapters from Mangadex
    + None
