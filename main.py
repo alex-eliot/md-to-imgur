@@ -144,6 +144,7 @@ if searchResults.status_code == 200:
                     + " - ", end = '')
             print(groups)
         chapterSelection = input("\nSelect one or more (separated by comma): ").replace(' ', '')
+        chapterSelection = stringFormat(chapterSelection, len(chapterList["results"]))
 
         print("\nSelect the quality to save.\n")
         print("[1]: Original Quality\n[2]: Data Saver\n")
