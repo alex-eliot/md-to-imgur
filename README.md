@@ -131,9 +131,9 @@ Number of fallback servers: F
 Number of failures to receive from fallback servers: fail<sub>F</sub> &#8804; F
 Number of reconnection attempts: R
 
-The general formula for how many requests are sent to RapidAPI's API is: <img src="https://latex2image-output.s3.amazonaws.com/img-x2Dd5gSQ.jpg" />
+The general formula for how many requests are sent to RapidAPI's API is: <img src="https://latex2image-output.s3.amazonaws.com/img-A6Cxpstd.jpg" />
 
-With the most optimal conditions, where all pages of the chapters are sent without any errors, the total requests should be a simple <img src="https://latex2image-output.s3.amazonaws.com/img-QTB9q478.jpg" />.
+With the most optimal conditions, where all pages of the chapters are sent without any errors, the total requests should be a simple <img src="https://latex2image-output.s3.amazonaws.com/img-PUwq39yZ.jpg" />.
 For example, sending 4 chapters with 20 pages each chapter, should use 80 upload requests on RapidAPI. For every page send failure, it's +1.
 
 # Disclaimer
