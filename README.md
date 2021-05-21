@@ -122,21 +122,19 @@ Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and 
 
 ### Total RapidAPI requests depending on scenario
 
-Not completed here
-
 For the sake of consistency, let's declare the following:
- - Number of chapters selected: n
- - Number of pages in chapter n: k<sub>n</sub>
- - Number of priority servers: P
- - Number of failure to receive from priority servers: fail<sub>P</sub> &#8804; P
- - Number of fallback servers: F
- - Number of failure to receive from fallback servers: fail<sub>F</sub> &#8804; F
- - Number of reconnection attempts: R
+Number of chapters selected: n
+Number of pages in chapter n: k<sub>n</sub>
+Number of priority servers: P
+Number of failures to receive from priority servers: fail<sub>P</sub> &#8804; P
+Number of fallback servers: F
+Number of failures to receive from fallback servers: fail<sub>F</sub> &#8804; F
+Number of reconnection attempts: R
 
- - Search and download chapters from Mangadex
-   + None
- - Send a chapter to imgur (without custom cover)
-   + <img src="https://latex2image-output.s3.amazonaws.com/img-hTtxeF5N.jpg" />
+The general formula for how many requests are sent to RapidAPI's API is: <img src="https://latex2image-output.s3.amazonaws.com/img-x2Dd5gSQ.jpg" />
+
+With the most optimal conditions, where all pages of the chapters are sent without any errors, the total requests should be a simple <img src="https://latex2image-output.s3.amazonaws.com/img-QTB9q478.jpg" />.
+For example, sending 4 chapters with 20 pages each chapter, should use 80 upload requests on RapidAPI. For every page send failure, it's +1.
 
 # Disclaimer
 
