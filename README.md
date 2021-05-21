@@ -125,8 +125,8 @@ Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and 
 WIP
 
 For the sake of consistency, let's declare the following:
- - Number of chapters selected: <img src="https://latex2image-output.s3.amazonaws.com/img-m8uaX9yc.png"/>
- - Number of pages in chapter <img src="https://latex2image-output.s3.amazonaws.com/img-m8uaX9yc.png"/>: <img src="https://latex2image-output.s3.amazonaws.com/img-yVA1CjEb.png"/>
+ - Number of chapters selected: <img src="https://latex2image-output.s3.amazonaws.com/img-8ByUeYMU.jpg"/>
+ - Number of pages in chapter <img src="https://latex2image-output.s3.amazonaws.com/img-8ByUeYMU.jpg"/>: <img src="https://latex2image-output.s3.amazonaws.com/img-g5zg3kRP.jpg"/>
  - Number of priority servers: <img src="https://latex.codecogs.com/gif.latex?P\text{}"/>
  - Number of failure to receive from priority servers: <img src="https://latex.codecogs.com/gif.latex?fail_P \leq P\text{}"/>
  - Number of fallback servers: <img src="https://latex.codecogs.com/gif.latex?F\text{}"/>
