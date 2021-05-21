@@ -128,7 +128,7 @@ For the sake of consistency, let's declare the following:
  - Number of chapters selected: n
  - Number of pages in chapter n: k<sub>n</sub>
  - Number of priority servers: P
- - Number of failure to receive from priority servers: fail<sub>P</sub> &#8804 P
+ - Number of failure to receive from priority servers: fail<sub>P</sub> &#8804; P
  - Number of fallback servers: <img src="https://latex.codecogs.com/gif.latex?F\text{}"/>
  - Number of failure to receive from fallback servers: <img src="https://latex.codecogs.com/gif.latex?fail_F \leq F\text{}"/>
  - Number of reconnection attempts: <img src="https://latex.codecogs.com/gif.latex?R\text{}"/>
