@@ -123,13 +123,13 @@ Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and 
 ### Total RapidAPI requests depending on scenario
 
 For the sake of consistency, let's declare the following:
-Number of chapters selected: n
-Number of pages in chapter n: k<sub>n</sub>
-Number of priority servers: P
-Number of failures to receive from priority servers: fail<sub>P</sub> &#8804; P
-Number of fallback servers: F
-Number of failures to receive from fallback servers: fail<sub>F</sub> &#8804; F
-Number of reconnection attempts: R
+Number of chapters selected: n <br>
+Number of pages in chapter n: k<sub>n</sub> <br>
+Number of priority servers: P <br>
+Number of failures to receive from priority servers: fail<sub>P</sub> &#8804; P <br>
+Number of fallback servers: F <br>
+Number of failures to receive from fallback servers: fail<sub>F</sub> &#8804; F <br>
+Number of reconnection attempts: R <br>
 
 The general formula for how many requests are sent to RapidAPI's API is: <img src="https://latex2image-output.s3.amazonaws.com/img-A6Cxpstd.jpg" />
 
