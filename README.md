@@ -122,7 +122,7 @@ Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and 
 
 ### Total RapidAPI requests depending on scenario
 
-For the sake of consistency, let's declare the following:
+For the sake of consistency, let's declare the following: <br>
 Number of chapters selected: n <br>
 Number of pages in chapter n: k<sub>n</sub> <br>
 Number of priority servers: P <br>
