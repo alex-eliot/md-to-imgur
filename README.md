@@ -37,11 +37,11 @@ In order to use the program, you need to make a settings.json file with the (tem
 }
 ```
 
-Below are listed what you need to set up in settings.json to get several functions working
+Below are listed what you need to set up in `settings.json` to get several functions working
 
  - Search and save chapters locally
    + Nothing
- - Search and save chapters on an imgur album (with an active token) (also creates a cubari.json with the appropriate format)
+ - Search and save chapters on an imgur album (with an active token) (also creates a `cubari.json` with the appropriate format)
    + `imgurToken`
    + `x-rapidapi-key`
  - Upload cubari.json to a Github repository with a custom name (and create git.io gist with custom link)
@@ -49,7 +49,7 @@ Below are listed what you need to set up in settings.json to get several functio
    + `repoDirectory` (Must be in the format `"username/repo"`)
  - Upload a custom cover for the cubari page
    + `clientID`
- - Automatically update imgurToken (access_token) running refreshImgurToken.py separately
+ - Automatically update imgurToken (access_token) running `refreshImgurToken.py` separately
    + `clientID`
    + `clientSecret`
    + `refreshToken`
@@ -63,7 +63,7 @@ Simply `python3 main.py` to run. Manga search query is currently only available 
  - `languageFilter`: Filter chapter by language, default=en (English)
  - `searchResultsLimit`: Search results limit (Mangadex values: min=1, max=100, default=10)
  - `chapterResultsLimit`: Chapter results limit (Mangadex values: min=1, max=500, default=100)
- - `fallbackServers`: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attmept to retrieve it from the server(s) given
+ - `fallbackServers`: Fallback mangadex node servers, if you know a stable node that is fast/reliable, you can add the link(s) in a list, and if a certain image fails to be sent/retrieved from a random server, the program will attempt to retrieve it from the server(s) given
  - `maxReconnectAttempts`: If none of the fallback servers succeed in giving the requested image, the program will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
 
 ## Selecting chapters
@@ -84,11 +84,12 @@ For example, if the chapter list is printed as such:
 ```
 
  - Input `4` to select chapter 4.
- - Input `1,2,5,10` to select chapters 1, 2, 5 and 10.
- - Input `1-5` to select all chapters from 1 to 5.
+ - Input `1,2,5,10` to select chapters 1, 2, 5, 10.
+ - Input `1-5` to select chapters 1, 2, 3, 4, 6
+ - Input `1-3, 6-10` to select chapters 1, 2, 3, 6, 7, 8, 9, 10
  - Input `all` to select all listed chapters.
 
-Note that when inputting selection, the numbers are following the chapters' indexes and not their numberings on Mangadex.
+Note that when inputting selection, the numbers are following the chapters' indexes and not their numberings on Mangadex. Any spaces will be ignored.
 
 
 
