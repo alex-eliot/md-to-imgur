@@ -136,7 +136,7 @@ For the sake of consistency, let's declare the following:
  - Search and download chapters from Mangadex
    + None
  - Send a chapter to imgur (without custom cover)
-   + <img src="https://latex2image-output.s3.amazonaws.com/img-4dkaNMja.jpg" />
+   + <img src="https://latex2image-output.s3.amazonaws.com/img-hTtxeF5N.jpg" />
 
 # Disclaimer
 
