@@ -2,5 +2,8 @@ __pycache__/
 .git/
 sampleResponses/
 settingsDummy/
+logs/
+manga/
+
 api.yaml
 settings.json
