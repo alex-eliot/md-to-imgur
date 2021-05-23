@@ -23,7 +23,7 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
         cached = False
 
     time_diff = (end_time - start_time)
-    response_time = time_diff.total_seconds() * 1000
+    response_time = time_diff.total_seconds()
 
     if testImg.status_code == 200:
         globals.log += "{} (#) Test image successfully received\n".format(datetime.now().isoformat().split(".")[0])
