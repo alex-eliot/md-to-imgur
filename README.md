@@ -31,7 +31,7 @@ In order to use the program, you need to make a settings.json file with the (tem
   "repoDirectory": "YOUR_GITHUB_REPO_DIRECTORY",
   "languageFilter": [
      "en"
-  ]
+  ],
   "searchResultsLimit": 30,
   "chapterResultsLimit": 500,
   "priorityServers": [],
