@@ -181,9 +181,9 @@ def main():
             cubariJson["chapters"] = {}
 
         payload = {
-            "limit":            data["chapterResultsLimit"],
-            "locales[]":        data["languageFilter"],
-            "order[chapter]":   "asc"
+            "limit":                    data["chapterResultsLimit"],
+            "translatedLanguage[]":     data["languageFilter"],
+            "order[chapter]":           "asc"
         }
         getChapterList = requests.get(globals.mdlink + "/manga/" + mangaID + "/feed", params=payload)
         with open("{}/logs/jsons/{}".format(globals.rootDir, "chapterResults.json"), "w") as f:
