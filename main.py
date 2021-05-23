@@ -111,7 +111,7 @@ def main():
         if saveOption == "imgur":
             customCover = input("Would you like to use a custom cover? (y/n): ").replace(' ', '')
             if customCover == "y":
-                globals.log += "(#) Selected custom cover"
+                globals.log += "(#) Selected custom cover\n"
                 fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
                 success = False
                 while not success:
@@ -229,7 +229,7 @@ def main():
                 globals.log += "(#) Getting chapter {} groups.\n".format(chapterNumber)
                 groups = getChapterGroups(chapterList["results"][int(selectedChapter) - 1])
                 globals.log += "(#) Initiating chapter {} send/retrieval\n".format(chapterNumber)
-                pageIDs, contents, success = sendToImgur.sendChapter(chapterList["results"][int(selectedChapter) - 1], qualitySelect, saveOption, data, headers)
+                pageIDs, contents, success = sendToImgur.sendChapter(chapterList["results"][int(selectedChapter) - 1], mangaName, qualitySelect, saveOption, data, headers)
 
                 if not success:
                     globals.log += "(#) Failed to receive all pages for chapter {}\n".format(chapterNumber)

@@ -25,7 +25,7 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
     if testImg.status_code == 200:
         globals.log += "(#) Test image successfully received\n"
         globals.log += "(#) Image bytes = {}\n".format(len(testImg.content))
-        globals.log += "(#) md@home server url = {}\n".format(atHomeServer)
+        globals.log += "(#) server url = {}\n".format(atHomeServer)
         # extention = "." + page.split(".")[-1]
         # with open("test" + extention, 'wb') as outimg:
         #     outimg.write(testImg.content)
@@ -45,7 +45,7 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
         else:
             return None
 
-def sendChapter(chapter, dataSaver, saveOption, data, headers):
+def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
 
     chapterID = chapter["data"]["id"]
     chapterHash = chapter["data"]["attributes"]["hash"]
