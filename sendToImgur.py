@@ -44,7 +44,7 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
         if getNewIfFail:
             globals.log += "{} (#) Finding another server\n".format(datetime.now().isoformat().split(".")[0])
             atHomeServer = requests.get(globals.mdlink + "/at-home/server/" + chapterID).json()["baseUrl"]
-            return imageRetrieveTest(atHomeServer, hash, page, isDataSaver, chapterID, report=report, getNewIfFail=getNewIfFail)
+            return imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=report, getNewIfFail=getNewIfFail)
         else:
             return None
 
