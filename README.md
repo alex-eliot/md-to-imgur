@@ -29,7 +29,9 @@ In order to use the program, you need to make a settings.json file with the (tem
   "x-rapidapi-key": "YOUR_X-RAPIDAPI-KEY",
   "githubToken": "YOUR_GITHUB_TOKEN",
   "repoDirectory": "YOUR_GITHUB_REPO_DIRECTORY",
-  "languageFilter": "en",
+  "languageFilter": [
+     "en"
+  ]
   "searchResultsLimit": 30,
   "chapterResultsLimit": 500,
   "priorityServers": [],
