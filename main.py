@@ -28,9 +28,9 @@ def main():
     cubariPage = None
 
     with open("./settings.json", 'r') as f:
-        globals.log += "(#) Loading settings\n"
+        globals.log += "{} (#) Loading settings\n".format(datetime.now().isoformat().split(".")[0])
         data = json.load(f)
-        globals.log += "(#) Settings loaded\n"
+        globals.log += "{} (#) Settings loaded\n".format(datetime.now().isoformat().split(".")[0])
         settingsStatus = {
           "imgurToken": "no_entry",
           "clientID": "no_entry",
@@ -43,25 +43,25 @@ def main():
 
         if len(data["imgurToken"]) == 40:
             settingsStatus["imgurToken"] = "ok"
-            globals.log += "(#) imgurToken ok\n"
+            globals.log += "{} (#) imgurToken ok\n".format(datetime.now().isoformat().split(".")[0])
         if len(data["clientID"]) == 15:
             settingsStatus["clientID"] = "ok"
-            globals.log += "(#) clientID ok\n"
+            globals.log += "{} (#) clientID ok\n".format(datetime.now().isoformat().split(".")[0])
         if len(data["clientSecret"]) == 40:
             settingsStatus["clientSecret"] = "ok"
-            globals.log += "(#) clientSecret ok\n"
+            globals.log += "{} (#) clientSecret ok\n".format(datetime.now().isoformat().split(".")[0])
         if len(data["refreshToken"]) == 40:
             settingsStatus["refreshToken"] = "ok"
-            globals.log += "(#) refreshToken ok\n"
+            globals.log += "{} (#) refreshToken ok\n".format(datetime.now().isoformat().split(".")[0])
         if len(data["x-rapidapi-key"]) == 50:
             settingsStatus["x-rapidapi-key"] = "ok"
-            globals.log += "(#) x-rapidapi-key ok\n"
+            globals.log += "{} (#) x-rapidapi-key ok\n".format(datetime.now().isoformat().split(".")[0])
         if len(data["githubToken"]) == 40:
             settingsStatus["githubToken"] = "ok"
-            globals.log += "(#) githubToken ok\n"
+            globals.log += "{} (#) githubToken ok\n".format(datetime.now().isoformat().split(".")[0])
         if "" not in data["repoDirectory"].split("/"):
             settingsStatus["repoDirectory"] = "ok"
-            globals.log += "(#) repoDirectory ok\n"
+            globals.log += "{} (#) repoDirectory ok\n".format(datetime.now().isoformat().split(".")[0])
 
 
 
@@ -74,12 +74,12 @@ def main():
     }
 
     query = input("Search for a manga: ")
-    globals.log += "(#) Searching for [{}]\n".format(query)
+    globals.log += "{} (#) Searching for [{}]\n".format(datetime.now().isoformat().split(".")[0], query)
     searchResults = requests.get(globals.mdlink + "/manga", params = {"title": query, "limit": data["searchResultsLimit"]})
     with open("{}/logs/jsons/{}".format(globals.rootDir, "searchResults.json"), "w") as f:
         json.dump(searchResults.json(), f, indent=2)
 
-    globals.log += "(#) Search returned status code {}\n".format(searchResults.status_code)
+    globals.log += "{} (#) Search returned status code {}\n".format(datetime.now().isoformat().split(".")[0], searchResults.status_code)
 
     if searchResults.status_code == 200:
 
@@ -103,23 +103,23 @@ def main():
                 + "imgur" * (saveOption == "2")
         )
 
-        globals.log += "(#) Save option: {}\n".format(saveOption)
+        globals.log += "{} (#) Save option: {}\n".format(datetime.now().isoformat().split(".")[0], saveOption)
 
         if saveOption == "imgur":
             customCover = input("Would you like to use a custom cover? (y/n): ").replace(' ', '')
             if customCover == "y":
-                globals.log += "(#) Selected custom cover\n"
+                globals.log += "{} (#) Selected custom cover\n".format(datetime.now().isoformat().split(".")[0])
                 fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
                 success = False
                 while not success:
-                    globals.log += "(#) Selected local path.\n" * (fileOrLink == "1") + "(#) Selected image link\n" * (fileOrLink == "2")
+                    globals.log += "{} (#) Selected local path.\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "1") + "(#) Selected image link\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "2")
                     if fileOrLink == "1":
                         coverPath = input("\nInput path for the image: ")
-                        globals.log += "(#) Path input: {}\n".format(coverPath)
+                        globals.log += "{} (#) Path input: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
                         try:
                             with open(coverPath, 'rb') as f:
                                 coverSend = requests.post(globals.imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-                                globals.log += "(#) Cover uploading returned status code {}\n".format(coverSend.status_code)
+                                globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
                                 if coverSend.status_code == 200:
                                     success = True
                                     print("(#) Cover successfully uploaded.")
@@ -129,20 +129,20 @@ def main():
                             print("(!) Unable to access/locate file.")
                     elif fileOrLink == "2":
                         coverPath = input("\nInput link for the image: ")
-                        globals.log += "(#) Image link: {}\n".format(coverPath)
+                        globals.log += "{} (#) Image link: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
                         coverSend = requests.post(globals.imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-                        globals.log += "(#) Cover uploading returned status code {}\n".format(coverSend.status_code)
+                        globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
                         if coverSend.status_code == 200:
                             success = True
                             print("(#) Cover successfully uploaded.")
                         else:
                             print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
                     else:
-                        globals.log += "(!) Invalid input: {}\n".format(fileOrLink)
+                        globals.log += "{} (!) Invalid input: {}\n".format(datetime.now().isoformat().split(".")[0], fileOrLink)
                         print("(!) Invalid input.")
                         fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
                 coverId = coverSend.json()["data"]["id"]
-                globals.log += "(#) Cover uploaded, id: {}".format(coverId)
+                globals.log += "{} (#) Cover uploaded, id: {}".format(datetime.now().isoformat().split(".")[0], coverId)
 
             mdDescription = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["description"]["en"]
             mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
@@ -150,7 +150,7 @@ def main():
             cubariJson = {}
             artistIds = []
             authorsIds = []
-            globals.log += "(#) Getting author and artist names from ID\n"
+            globals.log += "{} (#) Getting author and artist names from ID\n".format(datetime.now().isoformat().split(".")[0])
             for relationship in mangaQuery["results"][int(mangaSelection) - 1]["relationships"]:
                 if relationship["type"] == "artist":
                     artistIds.append(relationship["id"])
@@ -186,7 +186,7 @@ def main():
         with open("{}/logs/jsons/{}".format(globals.rootDir, "chapterResults.json"), "w") as f:
             json.dump(getChapterList.json(), f, indent=2)
 
-        globals.log += "(#) Get Chapter list returned status code {}\n".format(getChapterList.status_code)
+        globals.log += "{} (#) Get Chapter list returned status code {}\n".format(datetime.now().isoformat().split(".")[0], getChapterList.status_code)
 
         if getChapterList.status_code == 200:
             chapterList = getChapterList.json()
@@ -207,10 +207,10 @@ def main():
 
             chapterSelection = input("\nSelect one or more (separated by comma): ").replace(' ', '')
             chapterSelection = stringFormat(chapterSelection, len(chapterList["results"]))
-            globals.log += "(#) Selected chapters {}\n".format(chapterSelection)
+            globals.log += "{} (#) Selected chapters {}\n".format(datetime.now().isoformat().split(".")[0], chapterSelection)
 
             qualitySelect = input("\nSelect the quality to save.\n[1]: Original Quality\n[2]: Data Saver\n\nSelect one: ")
-            globals.log += "(#) Selected quality: {}\n".format("Original Quality" * (qualitySelect == "1") + "Data Saver" * (qualitySelect == "2"))
+            globals.log += "{} (#) Selected quality: {}\n".format(datetime.now().isoformat().split(".")[0], "Original Quality" * (qualitySelect == "1") + "Data Saver" * (qualitySelect == "2"))
             print()
 
             for selectedChapter in chapterSelection.split(","):
@@ -223,13 +223,13 @@ def main():
             for selectedChapter in chapterSelection.split(","):
                 chapterNumber = chapter["data"]["attributes"]["chapter"]
 
-                globals.log += "(#) Getting chapter {} groups.\n".format(chapterNumber)
+                globals.log += "{} (#) Getting chapter {} groups.\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
                 groups = getChapterGroups(chapterList["results"][int(selectedChapter) - 1])
-                globals.log += "(#) Initiating chapter {} send/retrieval\n".format(chapterNumber)
+                globals.log += "{} (#) Initiating chapter {} send/retrieval\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
                 pageIDs, contents, success = sendToImgur.sendChapter(chapterList["results"][int(selectedChapter) - 1], mangaName, qualitySelect, saveOption, data, headers)
 
                 if not success:
-                    globals.log += "(#) Failed to receive all pages for chapter {}\n".format(chapterNumber)
+                    globals.log += "{} (#) Failed to receive all pages for chapter {}\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
                     if input("(#) Failed to receive all pages for chapter {}. Would you like to create a cubari.json with the previously fetched chapters? (y/n): ").format(chapterNumber) != "y":
                         exit()
 
@@ -238,13 +238,13 @@ def main():
                         albumTitle = mangaName + " - Chapter " + list(contents.keys())[0]
                         payload = {"title": albumTitle, "cover": pageIDs[0], "privacy": "hidden", "ids[]": pageIDs}
 
-                        globals.log += "(#) Creating album\n"
+                        globals.log += "{} (#) Creating album\n".format(datetime.now().isoformat().split(".")[0])
 
                         albumCreate = requests.post(globals.albumCreateLink, data=payload, headers=headers)
                         if albumCreate.status_code == 200:
                             albumID = albumCreate.json()["data"]["id"]
 
-                            globals.log += "(#) Chapter {} album successfully created, id = {}".format(list(contents.keys())[0], albumID)
+                            globals.log += "{} (#) Chapter {} album successfully created, id = {}".format(datetime.now().isoformat().split(".")[0], list(contents.keys())[0], albumID)
 
                             contents[list(contents.keys())[0]]["groups"][groups] = "/proxy/api/imgur/chapter/{}/".format(albumID)
 
@@ -255,7 +255,7 @@ def main():
                 firstChapter = cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"][list(cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"].keys())[0]]
 
                 firstChapterID = firstChapter.split("/")[-2]
-                globals.log += "(#) Getting the album id of the first chapter uploaded\n"
+                globals.log += "{} (#) Getting the album id of the first chapter uploaded\n".format(datetime.now().isoformat().split(".")[0])
 
                 r1 = requests.get("https://imgur-apiv3.p.rapidapi.com/3/album/" + firstChapterID + "/images", headers=headers)
 
@@ -267,7 +267,7 @@ def main():
 
             if input("Would you like to create a file in Github? (y/n): ") == "y":
                 friendlyName = input("Input a friendly name for the json file on GitHub (without the extention): ").replace(' ', '') + ".json"
-                globals.log += "(#) Creating file '{}' on Github\n".format(friendlyName)
+                globals.log += "{} (#) Creating file '{}' on Github\n".format(datetime.now().isoformat().split(".")[0], friendlyName)
                 cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName)
 
     if success:
@@ -291,7 +291,7 @@ if __name__ == "__main__":
             f.write(globals.log)
     except KeyboardInterrupt:
         print("(!) Received keyboard interrupt\n")
-        globals.log += "(!) Received keyboard interrupt\n"
+        globals.log += "{} (!) Received keyboard interrupt\n".format(datetime.now().isoformat().split(".")[0])
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)
         try: # idk why this here but saw this on stackoverflow so yeah
@@ -301,6 +301,6 @@ if __name__ == "__main__":
     except Exception:
         print("(!) Exception occured. See logs for detials.\n")
         print(traceback.format_exc())
-        globals.log += "(!) Exception occred. Details:\n{}".format(str(traceback.format_exc()))
+        globals.log += "{} (!) Exception occred. Details:\n{}".format(datetime.now().isoformat().split(".")[0], str(traceback.format_exc()))
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)
