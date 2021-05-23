@@ -5,6 +5,9 @@ import globals
 
 from datetime import datetime
 
+def zeropad(zeros, name):
+    return "0" * (zeros - len(name)) + name
+
 def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False, getNewIfFail=False):
     globals.mdlink = "https://api.mangadex.org"
     link = atHomeServer + quality + hash + '/' + page
@@ -69,7 +72,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
     contents[chapterNumber]["last_updated"] = chapterTimeUpdatedUnix
 
     print(""
-    + "(#) Downloading chapter {}.".format(chapterNumber)           * (saveOption == "local")
+    + "(#) Downloading chapter {}".format(chapterNumber)           * (saveOption == "local")
     + "(#) Sending chapter {} to imgur".format(chapterNumber)       * (saveOption == "imgur")
     )
 

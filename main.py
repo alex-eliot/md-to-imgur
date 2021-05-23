@@ -24,9 +24,6 @@ except FileExistsError:
         pass
     pass
 
-def zeropad(zeros, name):
-    return "0" * (zeros - len(name)) + name
-
 def main():
     cubariPage = None
 
