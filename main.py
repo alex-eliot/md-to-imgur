@@ -271,9 +271,15 @@ def main():
                 cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName)
 
     if success:
-        print("(#) All chapters have uploaded")
+        print("(#) All chapters have been "
+            + "uploaded"        * (saveOption == "imgur")
+            + "downloaded"      * (saveOption == "local")
+        )
     else:
-        print("(#) Operation finished, not all chapters have been uploaded")
+        print("(#) Operation finished, not all chapters have been "
+            + "uploaded"        * (saveOption == "imgur")
+            + "downloaded"      * (saveOption == "local")
+        )
 
     if cubariPage is not None:
         print("\nCubari page: {}".format(cubariPage))
