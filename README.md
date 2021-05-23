@@ -11,6 +11,8 @@ A simple project with the (currently) following functions.
 
  - PyGithub
    + `pip3 install PyGithub`
+ - dateutils
+   + `pip3 install python-dateutils`
 
 You will need PyGithub in order to send the .json file into your Github repository. As of the moment, this project will not run if PyGithub is not installed, but it will be an optional dependency in the future.
 
