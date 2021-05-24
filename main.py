@@ -262,8 +262,8 @@ def main():
                 cover = "https://i.imgur.com/{}.png".format(r1.json()["data"][0]["id"])
                 cubariJson["cover"] = cover
 
-                with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
-                    json.dump(cubariJson, f, indent=2)
+            with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
+                json.dump(cubariJson, f, indent=2)
 
             if input("Would you like to create a file in Github? (y/n): ") == "y":
                 friendlyName = input("Input a friendly name for the json file on GitHub (without the extention): ").replace(' ', '') + ".json"

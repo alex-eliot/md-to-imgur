@@ -4,6 +4,7 @@ import json
 import globals
 
 from github import Github
+from datetime import datetime
 
 with open("settings.json", 'r') as f:
     data = json.load(f)
