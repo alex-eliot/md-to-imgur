@@ -101,7 +101,7 @@ For example, if the chapter list is printed as such:
 Note that when inputting selection, the numbers are following the chapters' indexes and not their numberings on Mangadex. Any spaces will be ignored.
 
 
-
+<!--
 ## Uploading custom covers
 
 If chosen to save to an imgur album, a prompt will appear asking if you wish to use a custom cover for the cubari.moe page.
@@ -111,7 +111,7 @@ If chosen to save to an imgur album, a prompt will appear asking if you wish to 
  - Uploading from url
    + Select `[2]: Image link` and thus input the url pointing to the image. To make sure the given url doesn't get changed or moved by the respective web admin of the image's domain, the image will be uploaded anonymously to imgur (this will use the imgur's API and not rapidAPI's)
 
-If you choose not to upload a custom cover, the program will assign the first page of the first chapter uploaded, as a cover.
+If you choose not to upload a custom cover, the program will assign the first page of the first chapter uploaded, as a cover. -->
 
 ## Saving to Github
 
