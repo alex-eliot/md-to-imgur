@@ -73,7 +73,7 @@ Here are a few settings related searching and retrieving from Mangadex servers.
  - `chapterResultsLimit`: Chapter results limit (Mangadex values: min=1, max=500, default=100)
  - `priorityServers`: The program will attempt to retrieve the images first from the servers listed. If it fails to do so, it will move on to the standard servers.
  - `fallbackServers`: If retrieving from priority and/or standard servers fails, the program will attempt to retrieve the image from the fallback servers.
- - `maxReconnectAttempts`: If the program fails to retrieve from priority/standard/fallback, it will attempt x times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages (Note, the program will inevitably attempt to retrieve the pages from the priority servers before moving to the new md@home server. In the future, the program will be updated to ignore priority and fallback servers in the case of reconnection).
+ - `maxReconnectAttempts`: If the program fails to retrieve from priority/standard/fallback, it will attempt n times to reconnect to a new md@home server and reattempt to send/retrieve the chapter pages.
 
 ## Selecting chapters
 
