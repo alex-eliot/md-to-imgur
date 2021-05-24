@@ -75,7 +75,9 @@ def main():
 
     query = input("Search for a manga: ")
     globals.log += "{} (#) Searching for [{}]\n".format(datetime.now().isoformat().split(".")[0], query)
-    searchResults = requests.get(globals.mdlink + "/manga", params = {"title": query, "limit": data["searchResultsLimit"]})
+
+    searchResults = requests.get("{}/manga".format(globals.mdlink), params = {"title": query, "limit": data["searchResultsLimit"]})
+
     with open("{}/logs/jsons/{}".format(globals.rootDir, "searchResults.json"), "w") as f:
         json.dump(searchResults.json(), f, indent=2)
 
@@ -97,6 +99,8 @@ def main():
         mangaName = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["title"]["en"]
         mangaMU = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["links"]["mu"]
 
+        globals.log += "{} (#) Selected {}, mangaID: {}\n".format(datetime.now().isoformat().split(".")[0], mangaName, mangaID)
+
         saveOption = input("\n[1]: Save locally\n[2]: Save to imgur album\n\nSelect one: ")
         saveOption = (""
                 + "local" * (saveOption == "1")
@@ -106,43 +110,76 @@ def main():
         globals.log += "{} (#) Save option: {}\n".format(datetime.now().isoformat().split(".")[0], saveOption)
 
         if saveOption == "imgur":
-            customCover = input("Would you like to use a custom cover? (y/n): ").replace(' ', '')
-            if customCover == "y":
-                globals.log += "{} (#) Selected custom cover\n".format(datetime.now().isoformat().split(".")[0])
-                fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
-                success = False
-                while not success:
-                    globals.log += "{} (#) Selected local path.\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "1") + "(#) Selected image link\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "2")
-                    if fileOrLink == "1":
-                        coverPath = input("\nInput path for the image: ")
-                        globals.log += "{} (#) Path input: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
-                        try:
-                            with open(coverPath, 'rb') as f:
-                                coverSend = requests.post(globals.imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-                                globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
-                                if coverSend.status_code == 200:
-                                    success = True
-                                    print("(#) Cover successfully uploaded.")
-                                else:
-                                    print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
-                        except OSError:
-                            print("(!) Unable to access/locate file.")
-                    elif fileOrLink == "2":
-                        coverPath = input("\nInput link for the image: ")
-                        globals.log += "{} (#) Image link: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
-                        coverSend = requests.post(globals.imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-                        globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
-                        if coverSend.status_code == 200:
-                            success = True
-                            print("(#) Cover successfully uploaded.")
-                        else:
-                            print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+            coverRetries = 5
+            coverId = None
+            print("(#) Uploading cover")
+            while coverRetries > 0:
+                covers = requests.get("{}/cover".format(globals.mdlink), params = {"manga[]": mangaID})
+
+                if covers.status_code == 200:
+                    if len(covers.json()["results"]) > 0:
+                        coverFilename = covers.json()["results"][0]["data"]["attributes"]["fileName"]
+                        coverFullLink = "https://uploads.mangadex.org/covers/{}/{}".format(mangaID, coverFilename)
+                        globals.log += "{} (#) Cover link: {}\n".format(datetime.now().isoformat().split(".")[0], coverFullLink)
+                        globals.log += "{} (#) Downloading cover\n".format(datetime.now().isoformat().split(".")[0])
+                        coverImg = requests.get(coverFullLink)
+                        if coverImg.status_code == 200:
+                            globals.log += "{} (#) Cover downloaded, sending to imgur\n".format(datetime.now().isoformat().split(".")[0])
+
+                            coverSend = requests.post(globals.imgurUploadLink, data={"image": coverImg.content}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+
+                            if coverSend.status_code == 200:
+                                coverRetries = 0
+                                print("(#) Cover successfully uploaded\n")
+                                coverId = coverSend.json()["data"]["id"]
+                                globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
+                            else:
+                                print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+                                globals.log += "{} (#) Could not upload cover, error code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
                     else:
-                        globals.log += "{} (!) Invalid input: {}\n".format(datetime.now().isoformat().split(".")[0], fileOrLink)
-                        print("(!) Invalid input.")
-                        fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
-                coverId = coverSend.json()["data"]["id"]
-                globals.log += "{} (#) Cover uploaded, id: {}".format(datetime.now().isoformat().split(".")[0], coverId)
+                        print("(!) Didn't find any covers for the manga, using first page")
+                        globals.log += "{} (!) Didn't find any covers for the manga, using first page\n".format(datetime.now().isoformat().split(".")[0])
+                        coverRetries = 0
+                else:
+                    coverRetries -= 1
+
+            # customCover = input("Would you like to use a custom cover? (y/n): ").replace(' ', '')
+            # if customCover == "y":
+            #     globals.log += "{} (#) Selected custom cover\n".format(datetime.now().isoformat().split(".")[0])
+            #     fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
+            #     success = False
+            #     while not success:
+            #         globals.log += "{} (#) Selected local path.\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "1") + "(#) Selected image link\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "2")
+            #         if fileOrLink == "1":
+            #             coverPath = input("\nInput path for the image: ")
+            #             globals.log += "{} (#) Path input: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
+            #             try:
+            #                 with open(coverPath, 'rb') as f:
+            #                     coverSend = requests.post(globals.imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+            #                     globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
+            #                     if coverSend.status_code == 200:
+            #                         success = True
+            #                         print("(#) Cover successfully uploaded")
+            #                     else:
+            #                         print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+            #             except OSError:
+            #                 print("(!) Unable to access/locate file.")
+            #         elif fileOrLink == "2":
+            #             coverPath = input("\nInput link for the image: ")
+            #             globals.log += "{} (#) Image link: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
+            #             coverSend = requests.post(globals.imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+            #             globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
+            #             if coverSend.status_code == 200:
+            #                 success = True
+            #                 print("(#) Cover successfully uploaded")
+            #             else:
+            #                 print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+            #         else:
+            #             globals.log += "{} (!) Invalid input: {}\n".format(datetime.now().isoformat().split(".")[0], fileOrLink)
+            #             print("(!) Invalid input.")
+            #             fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
+            #     coverId = coverSend.json()["data"]["id"]
+            #     globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
 
             mdDescription = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["description"]["en"]
             mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
@@ -173,7 +210,7 @@ def main():
             cubariJson["description"] = mdDescriptionFiltered
             cubariJson["artist"] = artistString
             cubariJson["author"] = authorString
-            if customCover == "y":
+            if coverId is not None:
                 cubariJson["cover"] = "https://i.imgur.com/{}.png".format(coverId)
             cubariJson["chapters"] = {}
 
@@ -251,7 +288,7 @@ def main():
                         cubariJson["chapters"][list(contents.keys())[0]] = contents[list(contents.keys())[0]]
 
         if saveOption == "imgur":
-            if customCover != "y":
+            if coverId is None:
                 firstChapter = cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"][list(cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"].keys())[0]]
 
                 firstChapterID = firstChapter.split("/")[-2]

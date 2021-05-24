@@ -16,7 +16,7 @@ def stringFormat(input, total):
             minimum = int(part.split("-")[0])
             maximum = int(part.split("-")[1]) + 1
             for i in range(minimum, maximum):
-                if index == len(counterparts) - 1:
+                if i == max(range(minimum, maximum)) and index == len(counterparts) - 1:
                     outString += "{}".format(i)
                 else:
                     outString += "{},".format(i)
@@ -26,5 +26,5 @@ def stringFormat(input, total):
                 outString += "{}".format(part)
             else:
                 outString += "{},".format(part)
-                
+
     return outString

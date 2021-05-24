@@ -43,7 +43,7 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
             requests.post("https://api.mangadex.network/report", data=payload)
         if getNewIfFail:
             globals.log += "{} (#) Finding another server\n".format(datetime.now().isoformat().split(".")[0])
-            atHomeServer = requests.get(globals.mdlink + "/at-home/server/" + chapterID).json()["baseUrl"]
+            atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID)).json()["baseUrl"]
             return imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=report, getNewIfFail=getNewIfFail)
         else:
             return None
@@ -107,7 +107,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
             globals.log += "{} (#) Server {} successfully retrieved the test image\n".format(datetime.now().isoformat().split(".")[0], fallbackServer)
 
     globals.log += "{} (#) Receiving md@home server address for chapter {}. ChapterID={} ChapterHash={}\n".format(datetime.now().isoformat().split(".")[0], chapterNumber, chapterID, chapterHash)
-    atHomeServer = requests.get(globals.mdlink + "/at-home/server/" + chapterID)
+    atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID))
     globals.log += "{} (#) Server retrieval returned status code {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.status_code)
     if atHomeServer.status_code == 200:
         globals.log += "{} (#) Server url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
@@ -239,7 +239,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
             globals.log += "{} (!) Unable to retrieve page {} of chapter {} from all attempts, attempting reconnection\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
             reconnectAttempts += 1
 
-            atHomeServer = requests.get(globals.mdlink + "/at-home/server/" + chapterID)
+            atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID))
             if atHomeServer.status_code == 200:
                 globals.log += "{} (#) New server found, url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
                 globals.log += "{} (#) Running server test\n".format(datetime.now().isoformat().split(".")[0])

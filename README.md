@@ -49,11 +49,10 @@ Below are listed what you need to set up in `settings.json` to get several funct
  - Search and save chapters on an imgur album (with an active token) (also creates a `cubari.json` with the appropriate format)
    + `imgurToken`
    + `x-rapidapi-key`
+   + `clientID`
  - Upload cubari.json to a Github repository with a custom name (and create git.io gist with custom link)
    + `githubToken`
    + `repoDirectory` (Must be in the format `"username/repo"`)
- - Upload a custom cover for the cubari page
-   + `clientID`
  - Automatically update imgurToken (access_token) running `refreshImgurToken.py` separately
    + `clientID`
    + `clientSecret`
@@ -61,7 +60,11 @@ Below are listed what you need to set up in `settings.json` to get several funct
 
 # Running/Using
 
-Simply `python3 main.py` to run. Manga search query is currently only available by name. Here are a few settings related searching and retrieving from Mangadex servers.
+Simply `python3 main.py` to run. Manga search query is currently only available by title. Note that if a chapter has more than one groups that have released the same chapter, the program will indeed upload all selected chapters to imgur, BUT on the cubari.json, only the last one will be present. While I could make the program to separate them, cubari itself doesn't support more than one chapters having the same numbering, so it's meaningless for now. All of the uploaded imgur album IDs can be found in the logs, if you feel like digging and not spam your imgur account with unused images. The logs are verbose, so search for the matching term `id = ` to find the imgur IDs (yes, with spaces).
+
+Quality of Life updates to the program "might" come. Currently, the only QoL feature is the program removing from your imgur account the previously uploaded pages of a chapter that failed to retrieve a page after all attempts (priority -> standard -> fallback -> reconnect n times). So for example, if the program uploaded 15 pages but the 16th fails, it will remove pages 1-15 (these are RapidAPI requests, for now).
+
+Here are a few settings related searching and retrieving from Mangadex servers.
 
 ## Settings
 
