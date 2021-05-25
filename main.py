@@ -18,10 +18,10 @@ globals.init()
 try:
     os.makedirs("{}/logs/jsons".format(globals.rootDir))
 except FileExistsError:
-    try:
-        os.makedirs("{}/cubari".format(globals.rootDir))
-    except FileExistsError:
-        pass
+    pass
+try:
+    os.makedirs("{}/cubari".format(globals.rootDir))
+except FileExistsError:
     pass
 
 def main():
@@ -258,7 +258,7 @@ def main():
                     pass
 
             for selectedChapter in chapterSelection.split(","):
-                chapterNumber = chapter["data"]["attributes"]["chapter"]
+                chapterNumber = chapterList["results"][int(selectedChapter) - 1]["data"]["attributes"]["chapter"]
 
                 globals.log += "{} (#) Getting chapter {} groups.\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
                 groups = getChapterGroups(chapterList["results"][int(selectedChapter) - 1])
@@ -267,7 +267,7 @@ def main():
 
                 if not success:
                     globals.log += "{} (#) Failed to receive all pages for chapter {}\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
-                    if input("(#) Failed to receive all pages for chapter {}. Would you like to create a cubari.json with the previously fetched chapters? (y/n): ").format(chapterNumber) != "y":
+                    if input("(#) Failed to receive all pages for chapter {}. Would you like to continue with the next chapter? (y/n): ".format(chapterNumber)) != "y":
                         exit()
 
                 else:
@@ -281,7 +281,7 @@ def main():
                         if albumCreate.status_code == 200:
                             albumID = albumCreate.json()["data"]["id"]
 
-                            globals.log += "{} (#) Chapter {} album successfully created, id = {}".format(datetime.now().isoformat().split(".")[0], list(contents.keys())[0], albumID)
+                            globals.log += "{} (#) Chapter {} album successfully created, id = {}\n".format(datetime.now().isoformat().split(".")[0], list(contents.keys())[0], albumID)
 
                             contents[list(contents.keys())[0]]["groups"][groups] = "/proxy/api/imgur/chapter/{}/".format(albumID)
 
@@ -331,6 +331,12 @@ if __name__ == "__main__":
         globals.log += "{} (!) Received keyboard interrupt\n".format(datetime.now().isoformat().split(".")[0])
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)
+        try:
+            with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
+                json.dump(cubariJson, f, indent=2)
+        except Exception:
+            globals.log += "{} (!) Couldn't write cubari.json\n".format(datetime.now().isoformat().split(".")[0])
+            pass
         try: # idk why this here but saw this on stackoverflow so yeah
             sys.exit(0)
         except SystemExit:

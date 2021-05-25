@@ -22,23 +22,33 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
     else:
         cached = False
 
-    time_diff = (end_time - start_time)
+    time_diff = (end_time - start_time) * 1000
     response_time = time_diff.total_seconds()
 
-    if testImg.status_code == 200:
-        globals.log += "{} (#) Test image successfully received\n".format(datetime.now().isoformat().split(".")[0])
-        globals.log += "{} (#) Image bytes = {}\n".format(datetime.now().isoformat().split(".")[0], len(testImg.content))
-        globals.log += "{} (#) server url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer)
-        # extention = "." + page.split(".")[-1]
-        # with open("test" + extention, 'wb') as outimg:
-        #     outimg.write(testImg.content)
-        if report:
-            payload = {"url": link, "success": True, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
-            requests.post("https://api.mangadex.network/report", data=payload)
-        return atHomeServer
+    if testImg.status_code == 200 and "Content-Type" in testImg.headers:
+        if "image/" in testImg.headers["Content-Type"]:
+            globals.log += "{} (#) Test image successfully received\n".format(datetime.now().isoformat().split(".")[0])
+            globals.log += "{} (#) Image bytes = {}\n".format(datetime.now().isoformat().split(".")[0], len(testImg.content))
+            globals.log += "{} (#) server url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer)
+            # extention = "." + page.split(".")[-1]
+            # with open("test" + extention, 'wb') as outimg:
+            #     outimg.write(testImg.content)
+            if report:
+                globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
+                payload = {"url": link, "success": True, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
+                requests.post("https://api.mangadex.network/report", data=payload)
+            return atHomeServer
+        else:
+            if report:
+                globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
+                payload = {"url": link, "success": False, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
+                requests.post("https://api.mangadex.network/report", data=payload)
+            atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID)).json()["baseUrl"]
+            return imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=report, getNewIfFail=getNewIfFail)
     else:
         globals.log += "{} (!) Unable to retrieve test image, error code {}\n".format(datetime.now().isoformat().split(".")[0], testImg.status_code)
         if report:
+            globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
             payload = {"url": link, "success": False, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
             requests.post("https://api.mangadex.network/report", data=payload)
         if getNewIfFail:
