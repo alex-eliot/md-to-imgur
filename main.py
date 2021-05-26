@@ -25,7 +25,8 @@ except FileExistsError:
     pass
 
 def main():
-    cubariPage = None
+
+    # LOADING SETTINGS
 
     with open("./settings.json", 'r') as f:
         globals.log += "{} (#) Loading settings\n".format(datetime.now().isoformat().split(".")[0])
@@ -64,15 +65,16 @@ def main():
             globals.log += "{} (#) repoDirectory ok\n".format(datetime.now().isoformat().split(".")[0])
 
 
+    cubariPage = None
 
-
-    headers = {
+    globals.headers = {
         "content-type": "application/x-www-form-urlencoded",
         "authorization": "Bearer " + data["imgurToken"],
         "x-rapidapi-key": data["x-rapidapi-key"],
         "x-rapidapi-host": "imgur-apiv3.p.rapidapi.com"
     }
 
+    # SEARCHING MANGA
     query = input("Search for a manga: ")
     globals.log += "{} (#) Searching for [{}]\n".format(datetime.now().isoformat().split(".")[0], query)
 
@@ -85,6 +87,7 @@ def main():
 
     if searchResults.status_code == 200:
 
+        # PRINTING FOUND MANGA
         mangaQuery = searchResults.json()
         print("\n(#) Found " + str(len(mangaQuery["results"])) + " manga.\n")
 
@@ -93,15 +96,27 @@ def main():
         for index, item in enumerate(mangaQuery["results"]):
             print("[" + str(index + 1), end=']: ')
             print(item["data"]["attributes"]["title"]["en"])
+
+        # SELECTING MANGA
         mangaSelection = input("\nSelect one: ")
 
+        while int(mangaSelection) not in range(1, len(mangaQuery["results"]) + 1):
+            print("(!) Invalid input, try again")
+            mangaSelection = input("\nSelect one: ")
+
+        # ASSIGNING USEFUL VALUES
         mangaID = mangaQuery["results"][int(mangaSelection) - 1]["data"]["id"]
         mangaName = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["title"]["en"]
-        mangaMU = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["links"]["mu"]
 
         globals.log += "{} (#) Selected {}, mangaID: {}\n".format(datetime.now().isoformat().split(".")[0], mangaName, mangaID)
 
+
+        # SELECTING SAVE OPTION
         saveOption = input("\n[1]: Save locally\n[2]: Save to imgur album\n\nSelect one: ")
+        while saveOption not in ["1", "2"]:
+            print("(!) Invalid input, try again")
+            saveOption = input("\n[1]: Save locally\n[2]: Save to imgur album\n\nSelect one: ")
+
         saveOption = (""
                 + "local" * (saveOption == "1")
                 + "imgur" * (saveOption == "2")
@@ -110,76 +125,23 @@ def main():
         globals.log += "{} (#) Save option: {}\n".format(datetime.now().isoformat().split(".")[0], saveOption)
 
         if saveOption == "imgur":
-            coverRetries = 5
-            coverId = None
-            print("(#) Uploading cover")
-            while coverRetries > 0:
-                covers = requests.get("{}/cover".format(globals.mdlink), params = {"manga[]": mangaID})
 
-                if covers.status_code == 200:
-                    if len(covers.json()["results"]) > 0:
-                        coverFilename = covers.json()["results"][0]["data"]["attributes"]["fileName"]
-                        coverFullLink = "https://uploads.mangadex.org/covers/{}/{}".format(mangaID, coverFilename)
-                        globals.log += "{} (#) Cover link: {}\n".format(datetime.now().isoformat().split(".")[0], coverFullLink)
-                        globals.log += "{} (#) Downloading cover\n".format(datetime.now().isoformat().split(".")[0])
-                        coverImg = requests.get(coverFullLink)
-                        if coverImg.status_code == 200:
-                            globals.log += "{} (#) Cover downloaded, sending to imgur\n".format(datetime.now().isoformat().split(".")[0])
+            saveInGithub = input("Would you like to create a file in Github? (y/n): ")
+            if saveInGithub == "y":
+                friendlyName = input("Input a friendly name for the json file on GitHub: ").replace(' ', '').replace(".json", "") + ".json"
+                makeGist = input("Would you like to create a gist? (y/n): ")
+                if makeGist == "y":
+                    customURL = input("Input custom name (leave empty if you want a random one): ")
 
-                            coverSend = requests.post(globals.imgurUploadLink, data={"image": coverImg.content}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+            customOrMangadexCover = input("\nWould you like to use a custom cover or use a cover from Mangadex?\n\n[1]: Mangadex cover\n[2]: Custom cover\n\nSelect one: ")
+            while customOrMangadexCover not in ["1", "2"]:
+                print("(!) Invalid input, try again")
+                customOrMangadexCover = input("Would you like to use a custom cover or use a cover from Mangadex?\n [1]: Mangadex cover\n[2]: Custom cover\nSelect one: ")
 
-                            if coverSend.status_code == 200:
-                                coverRetries = 0
-                                print("(#) Cover successfully uploaded\n")
-                                coverId = coverSend.json()["data"]["id"]
-                                globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
-                            else:
-                                print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
-                                globals.log += "{} (#) Could not upload cover, error code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
-                    else:
-                        print("(!) Didn't find any covers for the manga, using first page")
-                        globals.log += "{} (!) Didn't find any covers for the manga, using first page\n".format(datetime.now().isoformat().split(".")[0])
-                        coverRetries = 0
-                else:
-                    coverRetries -= 1
-
-            # customCover = input("Would you like to use a custom cover? (y/n): ").replace(' ', '')
-            # if customCover == "y":
-            #     globals.log += "{} (#) Selected custom cover\n".format(datetime.now().isoformat().split(".")[0])
-            #     fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
-            #     success = False
-            #     while not success:
-            #         globals.log += "{} (#) Selected local path.\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "1") + "(#) Selected image link\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "2")
-            #         if fileOrLink == "1":
-            #             coverPath = input("\nInput path for the image: ")
-            #             globals.log += "{} (#) Path input: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
-            #             try:
-            #                 with open(coverPath, 'rb') as f:
-            #                     coverSend = requests.post(globals.imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-            #                     globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
-            #                     if coverSend.status_code == 200:
-            #                         success = True
-            #                         print("(#) Cover successfully uploaded")
-            #                     else:
-            #                         print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
-            #             except OSError:
-            #                 print("(!) Unable to access/locate file.")
-            #         elif fileOrLink == "2":
-            #             coverPath = input("\nInput link for the image: ")
-            #             globals.log += "{} (#) Image link: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
-            #             coverSend = requests.post(globals.imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
-            #             globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
-            #             if coverSend.status_code == 200:
-            #                 success = True
-            #                 print("(#) Cover successfully uploaded")
-            #             else:
-            #                 print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
-            #         else:
-            #             globals.log += "{} (!) Invalid input: {}\n".format(datetime.now().isoformat().split(".")[0], fileOrLink)
-            #             print("(!) Invalid input.")
-            #             fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
-            #     coverId = coverSend.json()["data"]["id"]
-            #     globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
+            customOrMangadexCover = (""
+                                    + "mangadex"    * (customOrMangadexCover == "1")
+                                    + "custom"      * (customOrMangadexCover == "2")
+            )
 
             mdDescription = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["description"]["en"]
             mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
@@ -210,8 +172,6 @@ def main():
             cubariJson["description"] = mdDescriptionFiltered
             cubariJson["artist"] = artistString
             cubariJson["author"] = authorString
-            if coverId is not None:
-                cubariJson["cover"] = "https://i.imgur.com/{}.png".format(coverId)
             cubariJson["chapters"] = {}
 
         payload = {
@@ -263,12 +223,13 @@ def main():
                 globals.log += "{} (#) Getting chapter {} groups.\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
                 groups = getChapterGroups(chapterList["results"][int(selectedChapter) - 1])
                 globals.log += "{} (#) Initiating chapter {} send/retrieval\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
-                pageIDs, contents, success = sendToImgur.sendChapter(chapterList["results"][int(selectedChapter) - 1], mangaName, qualitySelect, saveOption, data, headers)
+                pageIDs, contents, success = sendToImgur.sendChapter(chapterList["results"][int(selectedChapter) - 1], mangaName, qualitySelect, saveOption, data)
 
                 if not success:
-                    globals.log += "{} (#) Failed to receive all pages for chapter {}\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
-                    if input("(#) Failed to receive all pages for chapter {}. Would you like to continue with the next chapter? (y/n): ".format(chapterNumber)) != "y":
-                        exit()
+                    globals.log += "{} (!) Failed to receive all pages for chapter {}\n".format(datetime.now().isoformat().split(".")[0], chapterNumber)
+                    if input("(!) Failed to receive all pages for chapter {}. Would you like to continue with the next chapter? (y/n): ".format(chapterNumber)) != "y":
+                        globals.log += "{} (#) User initiated program shutdown\n".format(datetime.now().isoformat().split(".")[0])
+                        raise Exception
 
                 else:
                     if saveOption == "imgur":
@@ -277,7 +238,7 @@ def main():
 
                         globals.log += "{} (#) Creating album\n".format(datetime.now().isoformat().split(".")[0])
 
-                        albumCreate = requests.post(globals.albumCreateLink, data=payload, headers=headers)
+                        albumCreate = requests.post(globals.albumCreateLink, data=payload, headers=globals.headers)
                         if albumCreate.status_code == 200:
                             albumID = albumCreate.json()["data"]["id"]
 
@@ -287,25 +248,101 @@ def main():
 
                         cubariJson["chapters"][list(contents.keys())[0]] = contents[list(contents.keys())[0]]
 
+
+        # UPLOADING COVER
         if saveOption == "imgur":
+            coverRetries = 5
+            coverId = None
+            if customOrMangadexCover == "mangadex":
+                print("(#) Uploading cover")
+                while coverRetries > 0:
+                    covers = requests.get("{}/cover".format(globals.mdlink), params = {"manga[]": mangaID})
+
+                    if covers.status_code == 200:
+                        if len(covers.json()["results"]) > 0:
+                            coverFilename = covers.json()["results"][0]["data"]["attributes"]["fileName"]
+                            coverFullLink = "https://uploads.mangadex.org/covers/{}/{}".format(mangaID, coverFilename)
+                            globals.log += "{} (#) Cover link: {}\n".format(datetime.now().isoformat().split(".")[0], coverFullLink)
+                            globals.log += "{} (#) Downloading cover\n".format(datetime.now().isoformat().split(".")[0])
+                            coverImg = requests.get(coverFullLink)
+                            if coverImg.status_code == 200:
+                                globals.log += "{} (#) Cover downloaded, sending to imgur\n".format(datetime.now().isoformat().split(".")[0])
+
+                                coverSend = requests.post(globals.imgurUploadLink, data={"image": coverImg.content}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+
+                                if coverSend.status_code == 200:
+                                    coverRetries = 0
+                                    print("(#) Cover successfully uploaded\n")
+                                    coverId = coverSend.json()["data"]["id"]
+                                    globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
+                                else:
+                                    print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+                                    globals.log += "{} (!) Unable to send cover to imgur, error code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
+                        else:
+                            print("(!) Didn't find any covers for the manga, using first page")
+                            globals.log += "{} (!) Didn't find any covers for the manga, using first page\n".format(datetime.now().isoformat().split(".")[0])
+                            coverRetries = 0
+                    else:
+                        coverRetries -= 1
+
+            elif customOrMangadexCover == "custom":
+                globals.log += "{} (#) Selected custom cover\n".format(datetime.now().isoformat().split(".")[0])
+                fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
+                coverRetries = 5
+                while coverRetries > 0:
+                    globals.log += "{} (#) Selected local path.\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "1") + "(#) Selected image link\n".format(datetime.now().isoformat().split(".")[0]) * (fileOrLink == "2")
+                    if fileOrLink == "1":
+                        coverPath = input("\nInput path for the image: ")
+                        globals.log += "{} (#) Path input: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
+                        try:
+                            with open(coverPath, 'rb') as f:
+                                coverSend = requests.post(globals.imgurUploadLink, data={"image": f.read()}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+                                globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
+                                if coverSend.status_code == 200:
+                                    coverRetries = 0
+                                    print("(#) Cover successfully uploaded")
+                                else:
+                                    print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+                                    coverRetries -= 1
+                        except OSError:
+                            print("(!) Unable to access/locate file.")
+                    elif fileOrLink == "2":
+                        coverPath = input("\nInput link for the image: ")
+                        globals.log += "{} (#) Image link: {}\n".format(datetime.now().isoformat().split(".")[0], coverPath)
+                        coverSend = requests.post(globals.imgurUploadLink, data={"image": coverPath}, headers={"Authorization": "Client-ID {}".format(data["clientID"])})
+                        globals.log += "{} (#) Cover uploading returned status code {}\n".format(datetime.now().isoformat().split(".")[0], coverSend.status_code)
+                        if coverSend.status_code == 200:
+                            coverRetries = 0
+                            print("(#) Cover successfully uploaded")
+                        else:
+                            print("(!) Unable to send cover to imgur, error code: {}".format(coverSend.status_code))
+                            coverRetries -= 1
+                    else:
+                        globals.log += "{} (!) Invalid input: {}\n".format(datetime.now().isoformat().split(".")[0], fileOrLink)
+                        print("(!) Invalid input.")
+                        fileOrLink = input("\n[1]: Local path\n[2]: Image link\n\nChoose one: ").replace(' ', '')
+
+                coverId = coverSend.json()["data"]["id"]
+                globals.log += "{} (#) Cover uploaded, id: {}\n".format(datetime.now().isoformat().split(".")[0], coverId)
             if coverId is None:
                 firstChapter = cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"][list(cubariJson["chapters"][list(cubariJson["chapters"].keys())[0]]["groups"].keys())[0]]
 
                 firstChapterID = firstChapter.split("/")[-2]
                 globals.log += "{} (#) Getting the album id of the first chapter uploaded\n".format(datetime.now().isoformat().split(".")[0])
 
-                r1 = requests.get("https://imgur-apiv3.p.rapidapi.com/3/album/" + firstChapterID + "/images", headers=headers)
+                r1 = requests.get("https://imgur-apiv3.p.rapidapi.com/3/album/" + firstChapterID + "/images", headers=globals.headers)
 
                 cover = "https://i.imgur.com/{}.png".format(r1.json()["data"][0]["id"])
                 cubariJson["cover"] = cover
+            else:
+                cubariJson["cover"] = "https://i.imgur.com/{}.png".format(coverId)
 
             with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
                 json.dump(cubariJson, f, indent=2)
 
-            if input("Would you like to create a file in Github? (y/n): ") == "y":
-                friendlyName = input("Input a friendly name for the json file on GitHub (without the extention): ").replace(' ', '') + ".json"
+            if saveInGithub == "y":
                 globals.log += "{} (#) Creating file '{}' on Github\n".format(datetime.now().isoformat().split(".")[0], friendlyName)
-                cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName)
+                cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName, makeGist, customURL)
 
     if success:
         print("(#) All chapters have been "
@@ -329,21 +366,22 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("(!) Received keyboard interrupt\n")
         globals.log += "{} (!) Received keyboard interrupt\n".format(datetime.now().isoformat().split(".")[0])
+        try:
+            with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
+                json.dump(cubariJson, f, indent=2)
+        except Exception:
+            globals.log += "{} (!) Couldn't write cubari.json\n".format(datetime.now().isoformat().split(".")[0])
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)
+    except Exception:
+        print("(!) Exception occured. See logs for detials.\n")
+        print(traceback.format_exc())
+        globals.log += "{} (!) Exception occred. Details:\n{}".format(datetime.now().isoformat().split(".")[0], str(traceback.format_exc()))
         try:
             with open("{}/cubari/cubari{}.json".format(globals.rootDir, datetime.now().isoformat().replace(":", " ")), "w") as f:
                 json.dump(cubariJson, f, indent=2)
         except Exception:
             globals.log += "{} (!) Couldn't write cubari.json\n".format(datetime.now().isoformat().split(".")[0])
             pass
-        try: # idk why this here but saw this on stackoverflow so yeah
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
-    except Exception:
-        print("(!) Exception occured. See logs for detials.\n")
-        print(traceback.format_exc())
-        globals.log += "{} (!) Exception occred. Details:\n{}".format(datetime.now().isoformat().split(".")[0], str(traceback.format_exc()))
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)

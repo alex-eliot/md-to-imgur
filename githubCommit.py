@@ -11,7 +11,7 @@ with open("settings.json", 'r') as f:
 
 g = Github(data["githubToken"])
 
-def makeFileAndGetGist(filedata, friendlyName):
+def makeFileAndGetGist(filedata, friendlyName, makeGist, customURL):
 
     # Configure settings.json for the github directory you want to save to. For example: "user41/foobar"
 
@@ -24,10 +24,9 @@ def makeFileAndGetGist(filedata, friendlyName):
     raw_url = "https://github.com/{}/raw/main/{}".format(data["repoDirectory"], friendlyName)
     globals.log += "{} (#) Raw url = {}\n".format(datetime.now().isoformat().split(".")[0], raw_url)
 
-    if input("Would you like to create a gist? (y/n): ") == "y":
+    if makeGist == "y":
         created = False
         while not created:
-            customURL = input("Input custom name (leave empty if you want a random one): ")
             if customURL == "":
                 globals.log += "{} (#) Creating gist with a random URL\n".format(datetime.now().isoformat().split(".")[0])
                 r = requests.post("https://git.io/", data={"url": raw_url})
@@ -43,6 +42,7 @@ def makeFileAndGetGist(filedata, friendlyName):
             elif r.status_code == 422:
                 globals.log += "{} (#) Could not create gist with custom URL because it's already taken\n".format(datetime.now().isoformat().split(".")[0])
                 print("(!) Could not create custom URL because it is taken, please try another.")
+                customURL = input("Input custom name (leave empty if you want a random one): ")
             else:
                 globals.log += "{} (#) Could not create gist link, status code {}".format(datetime.now().isoformat().split(".")[0], r.status_code)
                 return None

@@ -8,6 +8,7 @@ def init():
     global albumCreateLink
     global log
     global rootDir
+    global headers
 
     mdlink = "https://api.mangadex.org"
     imgurlink = "https://api.imgur.com"
@@ -17,3 +18,5 @@ def init():
 
     log = ""
     rootDir = str(os.getcwd()).replace("\\", '/')
+
+    headers = {}

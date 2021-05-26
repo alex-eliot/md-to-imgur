@@ -8,9 +8,44 @@ from datetime import datetime
 def zeropad(zeros, name):
     return "0" * (zeros - len(name)) + name
 
-def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False, getNewIfFail=False):
-    globals.mdlink = "https://api.mangadex.org"
+def reportServer(link, success, bytes, duration, cached):
+    globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, success, bytes, duration, cached)
+    payload = {"url": link, "success": success, "bytes": bytes, "duration": duration, "cached": cached}
+    report = requests.post("https://api.mangadex.network/report", data=payload)
+    return report.status_code
+
+def saveLocal(mangaName, pageNumber, chapterNumber, link):
+    globals.log += "{} (#) Downloading page {} of chapter {}\n".format(datetime.now().isoformat().split(".")[0], pageNumber, chapterNumber)
+    img = requests.get(link)
+    extention = "." + link.split(".")[-1]
+    filename = "{}/manga/{}/{}/{}".format(globals.rootDir, mangaName, chapterNumber, zeropad(3, str(pageNumber)) + extention)
+    if img.status_code == 200:
+        globals.log += "{} (#) Page {} of chapter {} downloaded\n".format(datetime.now().isoformat().split(".")[0], pageNumber, chapterNumber)
+        with open(filename, 'wb') as outfile:
+            outfile.write(img.content)
+        return True
+    else:
+        globals.log += "{} (!) Unable to retrieve page {}, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], pageNumber, img.status_code, link)
+        if i < len(data["priorityServers"]):
+            globals.log += "{} (#) Trying next priority server\n".format(datetime.now().isoformat().split(".")[0])
+        i += 1
+        return False
+
+def saveToImgur(mangaName, pageNumber, chapterNumber, link, pageIDs):
+    globals.log += "{} (#) Sending page {} of chapter {} to imgur\n".format(datetime.now().isoformat().split(".")[0], pageNumber, chapterNumber)
+    response = requests.post(globals.imgUploadLink, data=link, headers=globals.headers)
+    if response.status_code == 200:
+        globals.log += "{} (#) Page {} of chapter {} successfully sent to imgur\n".format(datetime.now().isoformat().split(".")[0], pageNumber, chapterNumber)
+        pageIDs.append(response.json()["data"]["id"])
+        return pageIDs, True
+    else:
+        globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], pageNumber, chapterNumber, response.status_code, link)
+        return pageIDs, False
+
+
+def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, data, report=False, getNewIfFail=False):
     link = atHomeServer + quality + hash + '/' + page
+    success = False
 
     globals.log += "{} (#) Getting test image\n".format(datetime.now().isoformat().split(".")[0])
     start_time = datetime.now()
@@ -22,43 +57,37 @@ def imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=False
     else:
         cached = False
 
-    time_diff = (end_time - start_time) * 1000
-    response_time = time_diff.total_seconds()
+    time_diff = end_time - start_time
+    response_time = time_diff.total_seconds() * 1000
 
     if testImg.status_code == 200 and "Content-Type" in testImg.headers:
         if "image/" in testImg.headers["Content-Type"]:
+            success = True
             globals.log += "{} (#) Test image successfully received\n".format(datetime.now().isoformat().split(".")[0])
-            globals.log += "{} (#) Image bytes = {}\n".format(datetime.now().isoformat().split(".")[0], len(testImg.content))
-            globals.log += "{} (#) server url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer)
             # extention = "." + page.split(".")[-1]
             # with open("test" + extention, 'wb') as outimg:
             #     outimg.write(testImg.content)
             if report:
-                globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
-                payload = {"url": link, "success": True, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
-                requests.post("https://api.mangadex.network/report", data=payload)
+                reportServer(link, success, len(testImg.content), int(response_time), cached)
             return atHomeServer
-        else:
-            if report:
-                globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
-                payload = {"url": link, "success": False, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
-                requests.post("https://api.mangadex.network/report", data=payload)
-            atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID)).json()["baseUrl"]
-            return imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=report, getNewIfFail=getNewIfFail)
-    else:
-        globals.log += "{} (!) Unable to retrieve test image, error code {}\n".format(datetime.now().isoformat().split(".")[0], testImg.status_code)
-        if report:
-            globals.log += "{} (#) Reporting: url: {}, success: {}, bytes: {}, duration: {}, cached: {}\n".format(datetime.now().isoformat().split(".")[0], link, False, len(testImg.content), int(response_time), cached)
-            payload = {"url": link, "success": False, "bytes": len(testImg.content), "duration": int(response_time), "cached": cached}
-            requests.post("https://api.mangadex.network/report", data=payload)
-        if getNewIfFail:
+
+    globals.log += "{} (!) Unable to retrieve test image, error code {}\n".format(datetime.now().isoformat().split(".")[0], testImg.status_code)
+    if report:
+        reportServer(link, success, len(testImg.content), int(response_time), cached)
+    if getNewIfFail:
+        reconnections = 0
+        while reconnections < data["maxReconnectAttempts"]:
+            reconnections += 1
             globals.log += "{} (#) Finding another server\n".format(datetime.now().isoformat().split(".")[0])
             atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID)).json()["baseUrl"]
-            return imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, report=report, getNewIfFail=getNewIfFail)
-        else:
-            return None
+            atHomeServer = imageRetrieveTest(atHomeServer, hash, page, quality, chapterID, data, report=report, getNewIfFail=False)
+            if atHomeServer is not None:
+                return atHomeServer
 
-def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
+    else:
+        return None
+
+def sendChapter(chapter, mangaName, dataSaver, saveOption, data):
 
     chapterID = chapter["data"]["id"]
     chapterHash = chapter["data"]["attributes"]["hash"]
@@ -101,7 +130,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
     if len(data["priorityServers"]) > 0:
         globals.log += "{} (#) Testing priority servers\n".format(datetime.now().isoformat().split(".")[0])
     for index, priorityServer in enumerate(data["priorityServers"]):
-        if imageRetrieveTest(priorityServer, chapterHash, pages[0], quality, chapterID, report=False, getNewIfFail=False) is None:
+        if imageRetrieveTest(priorityServer, chapterHash, pages[0], quality, chapterID, data, report=False, getNewIfFail=False) is None:
             data["priorityServers"].pop(index)
             globals.log += "{} (!) Server {} failed to retrieve test image, removing from list\n".format(datetime.now().isoformat().split(".")[0], priorityServer)
         else:
@@ -110,7 +139,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
     if len(data["fallbackServers"]) > 0:
         globals.log += "{} (#) Testing fallback servers\n".format(datetime.now().isoformat().split(".")[0])
     for index, fallbackServer in enumerate(data["fallbackServers"]):
-        if imageRetrieveTest(fallbackServer, chapterHash, pages[0], quality, chapterID, report=False, getNewIfFail=False) is None:
+        if imageRetrieveTest(fallbackServer, chapterHash, pages[0], quality, chapterID, data, report=False, getNewIfFail=False) is None:
             data["fallbackServers"].pop(index)
             globals.log += "{} (#) Server {} failed to retrieve test image, removing from list\n".format(datetime.now().isoformat().split(".")[0], fallbackServer)
         else:
@@ -122,7 +151,7 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
     if atHomeServer.status_code == 200:
         globals.log += "{} (#) Server url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
         globals.log += "{} (#) Testing standard server\n".format(datetime.now().isoformat().split(".")[0])
-        standardServer = imageRetrieveTest(atHomeServer.json()["baseUrl"], chapterHash, pages[0], quality, chapterID, report=True, getNewIfFail=True)
+        standardServer = imageRetrieveTest(atHomeServer.json()["baseUrl"], chapterHash, pages[0], quality, chapterID, data, report=True, getNewIfFail=True)
         if standardServer is None:
             globals.log += "{} (!) Server test failed, url = {}".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
         else:
@@ -147,30 +176,10 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
             globals.log += "{} (#) Server no.{}, full link: {}\n".format(datetime.now().isoformat().split(".")[0], i + 1, link)
 
             if saveOption == "local":
-                globals.log += "{} (#) Downloading page {} of chapter {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                img = requests.get(link)
-                extention = "." + page.split(".")[-1]
-                filename = "{}/manga/{}/{}/{}".format(globals.rootDir, mangaName, chapterNumber, zeropad(3, str(index + 1)) + extention)
-                if img.status_code == 200:
-                    globals.log += "{} (#) Page {} of chapter {} downloaded\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    with open(filename, 'wb') as outfile:
-                        outfile.write(img.content)
-                    retrieved = True
-                else:
-                    globals.log += "{} (!) Unable to retrieve page {}, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, img.status_code, link)
-                    if i < len(data["priorityServers"]):
-                        globals.log += "{} (#) Trying next priority server\n".format(datetime.now().isoformat().split(".")[0])
-                    i += 1
+                retrieved = saveLocal(mangaName, index + 1, chapterNumber, link)
 
             elif saveOption == "imgur":
-                globals.log += "{} (#) Sending page {} of chapter {} to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                response = requests.post(globals.imgUploadLink, data=link, headers=headers)
-                if response.status_code == 200:
-                    globals.log += "{} (#) Page {} of chapter {} sent to imgur. id = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.json()["data"]["id"])
-                    pageIDs.append(response.json()["data"]["id"])
-                    retrieved = True
-                else:
-                    globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}, url = \n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.status_code, link)
+                pageIDs, retrieved = saveToImgur(mangaName, index + 1, chapterNumber, link, pageIDs)
 
         # STANDARD SERVERS
         if not retrieved:
@@ -182,27 +191,10 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
                 globals.log += "{} (#) Full page link: {}\n".format(datetime.now().isoformat().split(".")[0], link)
 
                 if saveOption == "local":
-                    globals.log += "{} (#) Downloading page {} of chapter {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    img = requests.get(link)
-                    extention = "." + page.split(".")[-1]
-                    filename = "{}/manga/{}/{}/{}".format(globals.rootDir, mangaName, chapterNumber, zeropad(3, str(index + 1)) + extention)
-                    if img.status_code == 200:
-                        globals.log += "{} (#) Page {} of chapter {} downloaded\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                        with open(filename, 'wb') as outfile:
-                            outfile.write(img.content)
-                        retrieved = True
-                    else:
-                        globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, img.status_code)
+                    retrieved = saveLocal(mangaName, index + 1, chapterNumber, link)
 
                 elif saveOption == "imgur":
-                    globals.log += "{} (#) Sending page {} of chapter {} to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    response = requests.post(globals.imgUploadLink, data=link, headers=headers)
-                    if response.status_code == 200:
-                        globals.log += "{} (#) Page {} of chapter {} successfully sent to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                        pageIDs.append(response.json()["data"]["id"])
-                        retrieved = True
-                    else:
-                        globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.status_code, link)
+                    pageIDs, retrieved = saveToImgur(mangaName, index + 1, chapterNumber, link, pageIDs)
 
 
         # FALLBACK SERVERS
@@ -218,79 +210,35 @@ def sendChapter(chapter, mangaName, dataSaver, saveOption, data, headers):
             globals.log += "{} (#) Server no.{} full link: {}\n".format(datetime.now().isoformat().split(".")[0], i + 1, link)
 
             if saveOption == "local":
-                globals.log += "{} (#) Downloading page {} of chapter {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                img = requests.get(link)
-                extention = "." + page.split(".")[-1]
-                filename = "{}/manga/{}/{}/{}".format(globals.rootDir, mangaName, chapterNumber, zeropad(3, str(index + 1)) + extention)
-                if img.status_code == 200:
-                    globals.log += "{} (#) Page {} of chapter {} downloaded\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    with open(filename, 'wb') as outfile:
-                        outfile.write(img.content)
-                    retrieved = True
-                else:
-                    globals.log += "{} (!) Unable to retrieve page {}, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, img.status_code, link)
-                    if i < len(data["priorityServers"]):
-                        globals.log += "{} (#) Trying next fallback server\n".format(datetime.now().isoformat().split(".")[0])
-                    i += 1
+                retrieved = saveLocal(mangaName, index + 1, chapterNumber, link)
 
             elif saveOption == "imgur":
-                globals.log += "{} (#) Sending page {} of chapter {} to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                response = requests.post(globals.imgUploadLink, data=link, headers=headers)
-                if response.status_code == 200:
-                    globals.log += "{} (#) Page {} of chapter {} successfully sent to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    pageIDs.append(response.json()["data"]["id"])
-                    retrieved = True
-                else:
-                    globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.status_code, link)
+                pageIDs, retrieved = saveToImgur(mangaName, index + 1, chapterNumber, link, pageIDs)
 
-        # ALL SERVERS FAIL
-        reconnectAttempts = 0
-        while not retrieved and reconnectAttempts < data["maxReconnectAttempts"]:
+        # ALL SERVERS FAIL -> RECONNECTION
+        if not retrieved:
             globals.log += "{} (!) Unable to retrieve page {} of chapter {} from all attempts, attempting reconnection\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-            reconnectAttempts += 1
 
             atHomeServer = requests.get("{}/at-home/server/{}?forcePort443=true".format(globals.mdlink, chapterID))
-            if atHomeServer.status_code == 200:
-                globals.log += "{} (#) New server found, url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
-                globals.log += "{} (#) Running server test\n".format(datetime.now().isoformat().split(".")[0])
+            standardServer = imageRetrieveTest(atHomeServer.json()["baseUrl"], chapterHash, page, quality, chapterID, data, report=True, getNewIfFail=True)
 
-                standardServer = imageRetrieveTest(atHomeServer.json()["baseUrl"], chapterHash, page, quality, chapterID, report=True, getNewIfFail=True)
+            if standardServer is None:
+                globals.log += "{} (!) Server test failed, url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
+            else:
+                globals.log += "{} (#) Server test success\n".format(datetime.now().isoformat().split(".")[0])
 
                 link = standardServer + quality + chapterHash + '/' + page
 
-                if standardServer is None:
-                    globals.log += "{} (!) Server test failed, url = {}\n".format(datetime.now().isoformat().split(".")[0], atHomeServer.json()["baseUrl"])
-                else:
-                    globals.log += "{} (#) Server test success\n".format(datetime.now().isoformat().split(".")[0])
+                globals.log += "{} (#) New server found, Full url = {}\n".format(datetime.now().isoformat().split(".")[0], link)
 
                 if saveOption == "local":
-                    globals.log += "{} (#) Downloading page {} of chapter {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    img = requests.get(link)
-                    extention = "." + page.split(".")[-1]
-                    filename = "{}/manga/{}/{}/{}".format(globals.rootDir, mangaName, chapterNumber, zeropad(3, str(index + 1)) + extention)
-                    if img.status_code == 200:
-                        globals.log += "{} (#) Page {} of chapter {} downloaded\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                        with open(filename, 'wb') as outfile:
-                            outfile.write(img.content)
-                        retrieved = True
-                    else:
-                        globals.log += "{} (!) Unable to retrieve page {}, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, img.status_code, link)
+                    retrieved = saveLocal(mangaName, index + 1, chapterNumber, link)
 
                 elif saveOption == "imgur":
-                    globals.log += "{} (#) Sending page {} of chapter {} to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                    response = requests.post(globals.imgUploadLink, data=link, headers=headers)
-                    if response.status_code == 200:
-                        globals.log += "{} (#) Page {} of chapter {} successfully sent to imgur\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-                        pageIDs.append(response.json()["data"]["id"])
-                        retrieved = True
-                    else:
-                        globals.log += "{} (!) Failed to send page {} to imgur for chapter {}, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.status_code, link)
-            else:
-                globals.log += "{} (!) Failed to send page {} for chapter {} to imgur, error code: {}, url = {}\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber, response.status_code, link)
+                    pageIDs, retrieved = saveToImgur(mangaName, index + 1, chapterNumber, link, pageIDs)
 
+        # ALL ATTEMPTS FAIL -> DELETE IMAGES
         if not retrieved:
-            globals.log += "{} (!) Failed to retrieve page {} of chapter {} from all attempts\n".format(datetime.now().isoformat().split(".")[0], index + 1, chapterNumber)
-
             if len(pageIDs) > 0:
                 globals.log += "{} (#) Attempting to delete pages {}-{} of chapter {} from account\n".format(datetime.now().isoformat().split(".")[0], 1, index + 1, chapterNumber)
                 del_headers = {
