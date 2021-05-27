@@ -126,14 +126,3 @@ For example `Cubari link: https://cubari.moe/read/gist/BestManga/`
 ## Request management
 
 Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and a global limit of 50 uploads per hour and 500 requests per hour). For that reason, the program incorporates higher RapidAPI upload and request limits. The free plan offers 10,000 uploads and 100,000 total requests per month. As of the moment, the program doesn't do any tracking/checking for the remaining requests and uploads. Beware of the page count before uploading chapters, because if you pass the request limit on RapidAPI, you will be charged for every next request. My recommendation is to use a prepaid card with no credit, to avoid any potential charges that may occur.
-
-### Total RapidAPI requests depending on scenario
-
-For the sake of consistency, let's declare the following: <br>
-Number of chapters selected: n <br>
-Number of pages in chapter n: k<sub>n</sub> <br>
-Number of priority servers: P <br>
-Number of failures to receive from priority servers: fail<sub>P</sub> &#8804; P <br>
-Number of fallback servers: F <br>
-Number of failures to receive from fallback servers: fail<sub>F</sub> &#8804; F <br>
-Number of reconnection attempts: R <br>
