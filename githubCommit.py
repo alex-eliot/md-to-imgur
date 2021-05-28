@@ -9,6 +9,9 @@ from datetime import datetime
 with open("settings.json", 'r') as f:
     data = json.load(f)
 
+if "https://github.com/" in data["githubToken"]:
+    data["githubToken"] = data["githubToken"][19:]
+
 g = Github(data["githubToken"])
 
 def makeFileAndGetGist(filedata, friendlyName, makeGist, customURL):

@@ -131,7 +131,7 @@ def main():
                 friendlyName = input("Input a friendly name for the json file on GitHub: ").replace(' ', '').replace(".json", "") + ".json"
                 makeGist = input("Would you like to create a gist? (y/n): ")
                 if makeGist == "y":
-                    customURL = input("Input custom name (leave empty if you want a random one): ")
+                    customURL = input("Input custom name (leave empty if you want a random one): ").replace(" ", "")
 
             customOrMangadexCover = input("\nWould you like to use a custom cover or use a cover from Mangadex?\n\n[1]: Mangadex cover\n[2]: Custom cover\n\nSelect one: ")
             while customOrMangadexCover not in ["1", "2"]:
