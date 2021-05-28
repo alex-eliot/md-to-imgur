@@ -144,7 +144,10 @@ def main():
             )
 
             mdDescription = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["description"]["en"]
-            mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
+            if "\r" in mdDescription:
+                mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
+            else:
+                mdDescriptionFiltered = mdDescription
 
             cubariJson = {}
             artistIds = []
@@ -213,7 +216,7 @@ def main():
             for selectedChapter in chapterSelection.split(","):
                 chapterNumber = chapterList["results"][int(selectedChapter) - 1]["data"]["attributes"]["chapter"]
                 try:
-                    os.makedirs("{}/manga/{}/{}".format(globals.rootDir, mangaName, chapterNumber))
+                    os.makedirs("{}/manga/{}/{}".format(globals.rootDir, mangaName.replace("?", "").replace("\"", ""), chapterNumber))
                 except FileExistsError:
                     pass
 
