@@ -26,6 +26,7 @@ except FileExistsError:
 
 def main():
 
+    success = None
     # LOADING SETTINGS
 
     with open("./settings.json", 'r') as f:
@@ -86,6 +87,21 @@ def main():
     globals.log += "{} (#) Search returned status code {}\n".format(datetime.now().isoformat().split(".")[0], searchResults.status_code)
 
     if searchResults.status_code == 200:
+        mangaQuery = searchResults.json()
+        while mangaQuery["results"] == 0 and searchResults.status_code == 200:
+            globals.log += "{} (!) Didn't find any manga with the name [{}]".format(datetime.now().isoformat().split(".")[0], query)
+            print("{} (!) Didn't find any manga with the name [{}]".format(datetime.now().isoformat().split(".")[0], query))
+            query = input("Search for a manga: ")
+            globals.log += "{} (#) Searching for [{}]\n".format(datetime.now().isoformat().split(".")[0], query)
+
+            searchResults = requests.get("{}/manga".format(globals.mdlink), params = {"title": query, "limit": data["searchResultsLimit"]})
+
+            with open("{}/logs/jsons/{}".format(globals.rootDir, "searchResults.json"), "w") as f:
+                json.dump(searchResults.json(), f, indent=2)
+
+            globals.log += "{} (#) Search returned status code {}\n".format(datetime.now().isoformat().split(".")[0], searchResults.status_code)
+
+    if searchResults.status_code == 200:
 
         # PRINTING FOUND MANGA
         mangaQuery = searchResults.json()
@@ -128,7 +144,7 @@ def main():
 
             saveInGithub = input("Would you like to create a file in Github? (y/n): ")
             if saveInGithub == "y":
-                friendlyName = input("Input a friendly name for the json file on GitHub: ").replace(' ', '').replace(".json", "") + ".json"
+                friendlyName = input("Input a friendly name for the json file on GitHub: ").replace(' ', '').replace(" ", "").replace(".json", "") + ".json"
                 makeGist = input("Would you like to create a gist? (y/n): ")
                 if makeGist == "y":
                     customURL = input("Input custom name (leave empty if you want a random one): ").replace(" ", "")
@@ -182,7 +198,8 @@ def main():
             "translatedLanguage[]":     data["languageFilter"],
             "order[chapter]":           "asc"
         }
-        getChapterList = requests.get(globals.mdlink + "/manga/" + mangaID + "/feed", params=payload)
+        getChapterList = requests.get("{}/manga/{}/feed".format(globals.mdlink, mangaID), params = payload)
+        i = 1
         with open("{}/logs/jsons/{}".format(globals.rootDir, "chapterResults.json"), "w") as f:
             json.dump(getChapterList.json(), f, indent=2)
 
@@ -190,6 +207,23 @@ def main():
 
         if getChapterList.status_code == 200:
             chapterList = getChapterList.json()
+            while len(chapterList["results"]) == 500:
+                globals.log += "{} (#) Manga has more than {} chapters, extending search\n".format(datetime.now().isoformat().split(".")[0], 500*i)
+
+                payload = {
+                    "limit":                    data["chapterResultsLimit"],
+                    "translatedLanguage[]":     data["languageFilter"],
+                    "order[chapter]":           "asc",
+                    "offset":                   500 * i
+                }
+
+                offsetChapterList = requests.get("{}/manga/{}/feed".format(globals.mdlink, mangaID), params = payload)
+                if offsetChapterList.status_code == 200:
+                    if len(offsetChapterList.json()["results"]) > 0:
+                        for chapter in offsetChapterList.json()["results"]:
+                            chapterList["results"].append(chapter)
+                i += 1
+
 
             print("(#) Found " + str(len(chapterList["results"])) + " chapters.\n")
 
@@ -347,6 +381,12 @@ def main():
                 globals.log += "{} (#) Creating file '{}' on Github\n".format(datetime.now().isoformat().split(".")[0], friendlyName)
                 cubariPage = makeFileAndGetGist(json.dumps(cubariJson, indent=2), friendlyName, makeGist, customURL)
 
+    # IF NO MANGA FOUND
+    else:
+        globals.log += "{} (!) Couldn't access manga search endpoint\n".format(datetime.now().isoformat().split(".")[0])
+        print("(!) Unable to receive content from the Mangadex API")
+        return
+
     if success:
         print("(#) All chapters have been "
             + "uploaded"        * (saveOption == "imgur")
@@ -377,7 +417,7 @@ if __name__ == "__main__":
         with open ("{}/logs/{}.txt".format(globals.rootDir, datetime.now().isoformat().replace(":", " ").split(".")[0]), "w") as f:
             f.write(globals.log)
     except Exception:
-        print("(!) Exception occured. See logs for detials.\n")
+        print("(!) Exception occured. See logs for detials\n")
         print(traceback.format_exc())
         globals.log += "{} (!) Exception occred. Details:\n{}".format(datetime.now().isoformat().split(".")[0], str(traceback.format_exc()))
         try:
