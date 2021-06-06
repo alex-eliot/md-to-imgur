@@ -160,10 +160,7 @@ def main():
             )
 
             mdDescription = mangaQuery["results"][int(mangaSelection) - 1]["data"]["attributes"]["description"]["en"]
-            if "\r" in mdDescription:
-                mdDescriptionFiltered = mdDescription[0:mdDescription.index("\r")]
-            else:
-                mdDescriptionFiltered = mdDescription
+            mdDescriptionFiltered = mdDescription.replace("\r", "").replace("[b]", "").replace("[\b]", "").replace("[", "").replace("]", "").replace("url=", "").replace("/url", "")
 
             cubariJson = {}
             artistIds = []
@@ -193,8 +190,9 @@ def main():
             cubariJson["author"] = authorString
             cubariJson["chapters"] = {}
 
+        limit =  500 if int(data["chapterResultsLimit"]) >= 500 else int(data["chapterResultsLimit"])
         payload = {
-            "limit":                    data["chapterResultsLimit"],
+            "limit":                    limit,
             "translatedLanguage[]":     data["languageFilter"],
             "order[chapter]":           "asc"
         }
@@ -207,11 +205,12 @@ def main():
 
         if getChapterList.status_code == 200:
             chapterList = getChapterList.json()
-            while len(chapterList["results"]) == 500:
+            while len(chapterList["results"]) == i * limit:
                 globals.log += "{} (#) Manga has more than {} chapters, extending search\n".format(datetime.now().isoformat().split(".")[0], 500*i)
 
+                limit = 500 if int(data["chapterResultsLimit"]) - i * 500 >= 500 else int(data["chapterResultsLimit"]) - i * 500
                 payload = {
-                    "limit":                    data["chapterResultsLimit"],
+                    "limit":                    limit,
                     "translatedLanguage[]":     data["languageFilter"],
                     "order[chapter]":           "asc",
                     "offset":                   500 * i

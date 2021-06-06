@@ -17,6 +17,6 @@ def init():
     albumCreateLink = "https://imgur-apiv3.p.rapidapi.com/3/album"
 
     log = ""
-    rootDir = str(os.getcwd()).replace("\\", '/')
+    rootDir = str(os.getcwd()).replace("\\", "/")
 
     headers = {}
