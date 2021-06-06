@@ -10,13 +10,13 @@ def stringFormat(input, total):
         return outString
 
     elif "allexcept" in input:
-        input = input.replace("allexcept")
+        input = input.replace("allexcept", "")
         for i in range(1, total + 1):
-            if i == max(range(1, total + 1)):
-                outString += "{}".format(i)
-            else:
-                outString += "{},".format(i)
-        outString.replace(f"{input},", "") if int(input) < total + 1 else outString.replace(f"{input}", "")
+            if str(i) != input:
+                if i == max(range(1, total + 1)):
+                    outString += "{}".format(i)
+                else:
+                    outString += "{},".format(i)
         return outString
 
     counterparts = input.split(",")
