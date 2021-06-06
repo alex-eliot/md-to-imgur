@@ -97,7 +97,7 @@ For example, if the chapter list is printed as such:
  - Input `1-5` to select chapters 1, 2, 3, 4, 5
  - Input `1-3, 6-10` to select chapters 1, 2, 3, 6, 7, 8, 9, 10
  - Input `all` to select all listed chapters.
- - Input `all except5` or `allexcept5` to select all chapters except 5.
+ - Input `all except 5` or `allexcept5` to select all chapters except 5.
 
 Note that when inputting selection, the numbers are following the chapters' indexes and not their numberings on Mangadex. Any spaces will be ignored.
 
