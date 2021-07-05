@@ -116,14 +116,14 @@ If you choose not to upload a custom cover, the program will assign the first pa
 
 ## Saving to Github
 
-After the image sending process is complete, a prompt appears asking whether you want to save the appropriately formatted cubari.json into a Github repo. Input `y` to proceed and then input a name to save the json file as. Note that the name must not have the .json extention. If you want your file to be named as `BestManga.json`, your input should be `BestManga`.
+As of lately, the program will have the prompts of whether you want to save to GitHub and create a gist are at the beginning (so that you can input all your settings and leave the computer waiting for the process to finish). Input `y` to proceed and then input a name to save the json file as. Note that the name must not have the .json extention. If you want your file to be named as `BestManga.json`, your input should be `BestManga`.
 
 ## Creating custom gist links
 
-Lastly, if the image is selected to be uploaded to Github, user is asked if they want to create a git.io gist for that file. Selecting yes will prompt the user to input a name for the custom URL. You can simply press enter without inputting anything, to create a random link, and not a custom one.
+Lastly, if the chapter json is selected to be uploaded to Github, user is asked if they want to create a git.io gist for that file. Selecting yes will prompt the user to input a name for the custom URL. You can simply press enter without inputting anything, to create a random link, and not a custom one.
 The program will finally print the finalized cubari page to the console.
 For example `Cubari link: https://cubari.moe/read/gist/BestManga/`
 
 ## Request management
 
-Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and a global limit of 50 uploads per hour and 500 requests per hour). For that reason, the program incorporates higher RapidAPI upload and request limits. The free plan offers 10,000 uploads and 100,000 total requests per month. As of the moment, the program doesn't do any tracking/checking for the remaining requests and uploads. Beware of the page count before uploading chapters, because if you pass the request limit on RapidAPI, you will be charged for every next request. My recommendation is to use a prepaid card with no credit, to avoid any potential charges that may occur.
+Imgur's API is limited to 1250 uploads per day, and 12500 requests per day (and a global limit of 50 uploads per hour and 500 requests per hour). For that reason, the program incorporates higher RapidAPI upload and request limits. The free plan offers 10,000 uploads and 100,000 total requests per month. As of the moment, the program doesn't do any tracking/checking for the remaining requests and uploads. Beware of the page count before uploading chapters, because if you pass the request limit on RapidAPI, you will be charged for every next request. My recommendation is to use a prepaid card with no credit, to avoid any potential charges that may occur. I am not responsible for any charges that may occur to you through using this program. Due to the complexity of the program regarding the requests (because of priority/fallback/reconnections, failures, etc.), it isn't easy to predict how many RapidAPI requests will be used, and calculating the worst-case scenario wouldn't be too practical 
