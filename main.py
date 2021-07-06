@@ -230,6 +230,8 @@ def main():
 
                 groups = getChapterGroups(chapter)
 
+                chapter["data"]["attributes"]["chapter"] = chapter["data"]["attributes"]["chapter"] if chapter["data"]["attributes"]["chapter"] else "0 (Oneshot)"
+
                 print("[" + str(index + 1), end=']: ')
                 print("("
                         + chapter["data"]["attributes"]["translatedLanguage"]
